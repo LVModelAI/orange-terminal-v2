@@ -296,11 +296,6 @@ export const getPortfolio = tool({
     const nfts = pick(nftsR, [], "nfts");
     const tokensData = pick(tokensR, { tokens: [] }, "tokens");
 
-    console.log("protocols --- ", protocols);
-    console.log("staking --- ", staking);
-    console.log("nfts --- ", nfts);
-    console.log("tokensData --- ", tokensData);
-
     const tokens = (tokensData?.tokens ?? []).map((t: any) => {
       const amount = toUnits(t.balance ?? "0", t.decimals ?? 18);
       const price = t.price ?? 0;
@@ -320,6 +315,11 @@ export const getPortfolio = tool({
         change24hPercent,
       };
     });
+
+    // console.log("protocols --- ", protocols);
+    // console.log("staking --- ", staking);
+    // console.log("nfts --- ", nfts);
+    console.log("tokens --- ", tokens);
 
     return {
       protocols,

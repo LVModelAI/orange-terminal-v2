@@ -801,7 +801,7 @@ export default function TokenSwap({
             type: "text",
             text: `Swap for ${amount} ${symbolIn} to ${Number(
               formatUnits(expectedOut ?? 0n, decimalsOut)
-            ).toFixed(3)} ${symbolOut} was successfull.`,
+            ).toFixed(10)} ${symbolOut} was successfull.`,
           },
         ],
       });
@@ -883,7 +883,7 @@ export default function TokenSwap({
           <div className="flex items-center gap-2 mb-1">
             <span className="text-lg font-bold flex items-center gap-2">
               {amount} {symbolIn} <ArrowRightCircle size={24} />{" "}
-              {Number(formatUnits(expectedOut ?? 0n, decimalsOut)).toFixed(3)}{" "}
+              {Number(formatUnits(expectedOut ?? 0n, decimalsOut)).toFixed(10)}{" "}
               {symbolOut}
             </span>
           </div>

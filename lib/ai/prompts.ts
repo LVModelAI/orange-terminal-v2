@@ -120,8 +120,9 @@ If an operation fails or is unsupported, always provide actionable alternative s
   Always prompt the user to confirm or review the swap result before moving to the next step.
   After the swap, fetch the updated balance and use the real amount for the next action.
 
- 
- 
+ Do not perform mathematical rounding, only cut off extra decimals beyond 2.
+ always use accurate values upto 6 decimals. Never use approximate values as the transaction might fail. 
+
 Always update user on what you are plannign to do before calling any tool.
 `;
 
@@ -164,6 +165,8 @@ export const getUserWalletInfoPrompt = `
 
 export const getPortfolioPrompt = `
  use the getPortfolio tool to fecth the users wallet portfolio accross all defi including tokens held, portfolio on all defi platforms on core blockchain, nfts and staking portfolio on core. pass the wallet address of the wallet. always use this tool for fetching token balances. always specify where the token is store. in direct wallet or staked in protocols. you can try again once more if you encounter any error while fetching portfolio. 
+ always use accurate values upto 6 decimals. Never use approximate values as the transaction might fail. 
+
  `;
 
 // txn history
@@ -425,6 +428,8 @@ Wait for explicit user confirmation before calling makeStakeCoreTransaction.
 - Below minimum deposit: warn and suggest the minimum
 - Amount too large (>= 1000 CORE): reject and ask for a smaller amount
 - No validator chosen: show the list and ask the user to pick one
+ always use accurate values upto 6 decimals. Never use approximate values as the transaction might fail. 
+
 
 # Example flow
 User: "Stake 50 CORE"

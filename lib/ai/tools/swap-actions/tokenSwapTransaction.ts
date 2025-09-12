@@ -9,12 +9,6 @@ export type TokenSwapProps = {
   amount: string;
   slippage: string;
 };
-const floorToDecimals = (value: string, dp = 3): string => {
-  const num = Number(value) || 0;
-  const factor = 10 ** dp;
-  const floored = Math.floor(num * factor) / factor;
-  return floored.toFixed(dp); // keep trailing zeros if needed
-};
 
 export const tokenSwapTransaction = tool({
   description:
@@ -24,7 +18,9 @@ export const tokenSwapTransaction = tool({
     tokenOut: z.string().describe(" contract address for token out"),
     amount: z
       .string()
-      .describe("Amount of tokenIn to swap, human-readable (e.g., '25.5')"),
+      .describe(
+        "Amount of tokenIn to swap upto 6 decimals rounded down, human-readable (e.g., '25.521312')"
+      ),
     slippage: z.string().describe("Maximum allowed slippage"),
   }),
   execute: async ({
@@ -33,12 +29,10 @@ export const tokenSwapTransaction = tool({
     amount,
     slippage,
   }): Promise<TokenSwapProps> => {
-    // floor to 3 decimals
-    const floored3 = floorToDecimals(amount);
     console.log("Executing tokenSwapTransaction with params:", {
       tokenIn,
       tokenOut,
-      floored3,
+      amount,
       slippage,
     });
 
@@ -58,7 +52,7 @@ export const tokenSwapTransaction = tool({
     return {
       tokenIn,
       tokenOut,
-      amount: floored3,
+      amount,
       slippage,
     };
   },

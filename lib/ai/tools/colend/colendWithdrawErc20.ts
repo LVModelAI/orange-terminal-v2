@@ -1,4 +1,5 @@
 // colendWithdrawErc20.ts
+import { COLEND_POOL_PROXY_ADDRESS } from "@/lib/constants";
 import { ChatMessage } from "@/lib/types";
 import { UseChatHelpers } from "@ai-sdk/react";
 import { tool } from "ai";
@@ -47,7 +48,7 @@ export const colendWithdrawErc20 = tool({
       stage: "erc20-withdraw",
       withdraw: {
         method: "withdraw",
-        contractAddress: "0x0CEa9F0F49F30d376390e480ba32f903B43B19C5",
+        contractAddress: COLEND_POOL_PROXY_ADDRESS,
         tokenAddress,
         tokenName,
         amount: value,
