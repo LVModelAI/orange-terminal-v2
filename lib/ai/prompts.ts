@@ -365,6 +365,18 @@ Each protocol section returns both:
   - strategy_token_label (e.g., SolvBTC.b, oBTC, USDT)
   - risk_label
 
+## Pell section (protocol: "pell")
+- Raw: full stake objects from Pell API
+- Summary:
+  - stakeName
+  - stakeIcon
+  - currency
+  - restakeAssetNumber
+  - tvl
+  - rewards
+  - tagType
+  - chainType
+
 ## When to use getDefiProtocolsStats
 Use this tool whenever the user asks about:
 - Core DAO validators or staking stats
