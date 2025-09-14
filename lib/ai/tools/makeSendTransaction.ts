@@ -1,9 +1,9 @@
+import { CHAIN_ID } from "@/lib/constants";
 import { tool } from "ai";
 import z from "zod";
 
 export const makeSendTransaction = tool({
-  description:
-    "Make a transaction object on the Core blockchain. Pass the receiver,recever ens name if avalaible, sender, amount, and chainId. The chainId is 1116 for the Core blockchain.",
+  description: `Make a transaction object on the Core blockchain. Pass the receiver,recever ens name if avalaible, sender, amount, and chainId. The chainId is ${CHAIN_ID} for the Core blockchain.`,
   inputSchema: z.object({
     from: z.string().describe("The sender address"),
     receiver_address: z.string().describe("The receiver address"),
@@ -16,7 +16,7 @@ export const makeSendTransaction = tool({
       .describe(
         "The amount of tokens to send in human readable format eg, 0.5, 3"
       ),
-    chainId: z.number().default(1116),
+    chainId: z.number().default(CHAIN_ID),
   }),
   execute: async ({
     from,

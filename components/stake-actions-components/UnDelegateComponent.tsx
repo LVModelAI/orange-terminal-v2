@@ -9,16 +9,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
 import {
+  chainIdToCoreAgent,
   MAINNET_COREAGENT_CONTRACT_ADDRESS,
   TESTNET_COREAGENT_CONTRACT_ADDRESS,
 } from "@/lib/constants";
 import { UnDelegateComponentProps } from "@/lib/ai/tools/core-staking-actions/makeUnDelegateCoreTransaction";
 import { toast } from "sonner";
-
-const chainIdToCoreAgent: Record<number, string> = {
-  1114: TESTNET_COREAGENT_CONTRACT_ADDRESS,
-  1116: MAINNET_COREAGENT_CONTRACT_ADDRESS,
-};
 
 const coreAgentAbi = [
   {

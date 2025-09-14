@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { toUnits } from "@/lib/utils/to-units";
+import { PellToken } from "@/app/api/portfolio/pell-restaking-portfolio/route";
 
 // const nfts = [
 //   {
@@ -244,6 +245,23 @@ import { toUnits } from "@/lib/utils/to-units";
 //   },
 // };
 
+// Helper to unwrap results safely
+
+const pick = <T>(r: PromiseSettledResult<T>, fallback: T, label: string) => {
+  if (r.status === "fulfilled") return r.value;
+  console.warn(`${label} failed:`, r.reason);
+  return fallback;
+};
+
+async function getJson(url: string) {
+  const res = await fetch(url, { cache: "no-store" });
+  if (!res.ok) {
+    // Turn non-OK into a rejection so allSettled captures it
+    return "There was some error fetching porfolio, please try again.";
+    // throw new Error(`HTTP ${res.status} for ${url}`);
+  }
+  return res.json();
+}
 export const getPortfolio = tool({
   description:
     "Get the portfolio for a Core wallet with fungibleTokens, nfts, defi protocols stats and stakingPortfolio.",
@@ -261,35 +279,17 @@ export const getPortfolio = tool({
       staking: `${baseUrl}/api/portfolio/staking?address=${walletAddress}`,
       nfts: `${baseUrl}/api/portfolio/nfts?address=${walletAddress}`,
       tokens: `${baseUrl}/api/portfolio/tokens?address=${walletAddress}`,
+      pellRestakingPortfolio: `${baseUrl}/api/portfolio/pell-restaking-portfolio?address=${walletAddress}`,
     };
 
-    async function getJson(url: string) {
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) {
-        // Turn non-OK into a rejection so allSettled captures it
-        return "There was some error fetching porfolio, please try again.";
-        // throw new Error(`HTTP ${res.status} for ${url}`);
-      }
-      return res.json();
-    }
-
-    const [protocolsR, stakingR, nftsR, tokensR] = await Promise.allSettled([
-      getJson(endpoints.protocols),
-      getJson(endpoints.staking),
-      getJson(endpoints.nfts),
-      getJson(endpoints.tokens),
-    ]);
-
-    // Helper to unwrap results safely
-    const pick = <T>(
-      r: PromiseSettledResult<T>,
-      fallback: T,
-      label: string
-    ) => {
-      if (r.status === "fulfilled") return r.value;
-      console.warn(`${label} failed:`, r.reason);
-      return fallback;
-    };
+    const [protocolsR, stakingR, nftsR, tokensR, pellRestakingPortfolioR] =
+      await Promise.allSettled([
+        getJson(endpoints.protocols),
+        getJson(endpoints.staking),
+        getJson(endpoints.nfts),
+        getJson(endpoints.tokens),
+        getJson(endpoints.pellRestakingPortfolio),
+      ]);
 
     const protocols = pick(protocolsR, [], "protocols");
     const staking = pick(stakingR, [], "staking");
@@ -316,16 +316,31 @@ export const getPortfolio = tool({
       };
     });
 
+    let pellRestakingPortfolio = [];
+
+    // remove stakeIcon logo from pellRestakingPortfolio
+    try {
+      pellRestakingPortfolio = pick(
+        pellRestakingPortfolioR,
+        [],
+        "pellRestakingPortfolio"
+      ).tokens.map(({ stakeIcon, ...rest }: PellToken) => rest);
+    } catch (error) {
+      console.log("error --- ", error);
+    }
+
     // console.log("protocols --- ", protocols);
     // console.log("staking --- ", staking);
     // console.log("nfts --- ", nfts);
-    console.log("tokens --- ", tokens);
+    // console.log("tokens --- ", tokens);
+    console.log("pellRestakingPortfolio --- ", pellRestakingPortfolio);
 
     return {
       protocols,
       staking,
       nfts,
       tokens,
+      pellRestakingPortfolio,
     };
   },
 });

@@ -1,3 +1,4 @@
+import { CHAIN_ID } from "@/lib/constants";
 import { ChatMessage } from "@/lib/types";
 import { toWei } from "@/lib/utils";
 import { UseChatHelpers } from "@ai-sdk/react";
@@ -15,8 +16,7 @@ export interface ClaimRewardsComponentProps {
 
 // 1. Unstake (undelegate) CORE
 export const makeClaimRewardsTransaction = tool({
-  description:
-    "Create a claim rewards object to claim rewards from candidates. Pass the candidate address, name, value to unstake (in human-readable value) like 1.5 core, and chainId (default is 1116).",
+  description: `Create a claim rewards object to claim rewards from candidates. Pass the candidate address, name, value to unstake (in human-readable value) like 1.5 core, and chainId (default is ${CHAIN_ID}).`,
   inputSchema: z.object({
     candidateAddress: z
       .string()
@@ -27,7 +27,7 @@ export const makeClaimRewardsTransaction = tool({
       .describe(
         "The amount of CORE to undelegate (in human-readable value) like 1.5 core"
       ),
-    chainId: z.number().default(1116),
+    chainId: z.number().default(CHAIN_ID),
   }),
   execute: async ({ candidateAddress, candidateName, value, chainId }) => {
     const valueInWei = toWei(value);

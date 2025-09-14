@@ -1,3 +1,9 @@
+import {
+  COLEND_API,
+  DESYN_API,
+  PELL_API,
+  VALIDATORS_API,
+} from "@/lib/constants";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -230,225 +236,6 @@ const summarizePell = (raw: PellPoolRaw[]): PellPoolSummary[] => {
   }));
 };
 
-// ------------------- API URLs -------------------
-const VALIDATORS_API =
-  "https://staking-api.coredao.org/staking/status/validators";
-const COLEND_API = "https://yields.llama.fi/pools";
-const DESYN_API =
-  "https://api.desyn.io/core/etf/stats?offset=0&num=10&period=DAY&sortby=BY_NET_VALUE&desc=true&etype=&invest_label=&risk_label=&pay_token=&strategy_type=&strategy_token_label=&etf_status=-1&pool_name=";
-const PELL_API =
-  "https://api.pell.network/v1/stakeListByPage?page=1&pageSize=20&params=1116";
-/* 
- response : {
-    "code": 1,
-    "message": "success",
-    "result": {
-        "records": [
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x4282868539C7E22B9Bc9248fd7c8196cDaeeEF13",
-                "stakeName": "coreBTC",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/corebtc.png",
-                "currency": "coreBTC",
-                "restakeAssetNumber": 0.032667900000000000,
-                "tvl": 3785.218614310028455674000000000000000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.50X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x6FF890b47ebaA297D1aa2AcE17f1e989462eB5fa",
-                "stakeName": "SolvBTC.b",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/solvbtc.b.png",
-                "currency": "SolvBTC.b",
-                "restakeAssetNumber": 0.027026495186208722,
-                "tvl": 3131.550930987227007809268215731320000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.25X",
-                        "type": 1
-                    },
-                    {
-                        "key": "Solv Points",
-                        "value": "3XP",
-                        "type": 2
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x5F42E359cC166D79e0468F3439F952c115984286",
-                "stakeName": "SolvBTC.m",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/solvbtc.m.png",
-                "currency": "SolvBTC.m",
-                "restakeAssetNumber": 0.008651708478430782,
-                "tvl": 1002.470559115832035591075510894920000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.25X",
-                        "type": 1
-                    },
-                    {
-                        "key": "Solv Points",
-                        "value": "3XP",
-                        "type": 2
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0xe049552410c7a533dD1eaeDaE20b527a51d343E6",
-                "stakeName": "aBTC",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/abtc.png",
-                "currency": "aBTC",
-                "restakeAssetNumber": 0.000975825080743373,
-                "tvl": 113.068524757955117394624272974380000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.0X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x25B737513fD2588f2b0Ffc8Dee06d2B999f7E595",
-                "stakeName": "uBTC",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/btc.png",
-                "currency": "uBTC",
-                "restakeAssetNumber": 207.000500000000000000,
-                "tvl": 23985078.495143031702030000000000000000000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "0X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x4642De2853A9F9dB3080F51CdA267f1e9C900971",
-                "stakeName": "oBTC",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/obtc.png",
-                "currency": "oBTC",
-                "restakeAssetNumber": 0.000150000000000000,
-                "tvl": 17.380449681384609000000000000000000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.25X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x93c76cc2b322E66C99ac482a6BAE9B34bF49F67e",
-                "stakeName": "uBTC",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/btc.png",
-                "currency": "uBTC",
-                "restakeAssetNumber": 0.000101000000000000,
-                "tvl": 11.702836118798970060000000000000000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.05X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x57bF5B3492Fef24A4f883135CB2AAD27Ce227183",
-                "stakeName": "suBTC",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/subtc.png",
-                "currency": "suBTC",
-                "restakeAssetNumber": 100.100342001000000000,
-                "tvl": 11598593.048251805627451084060000000000000000000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.25X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0xAd92CEdF3A75611E369aBDA28f099F09802d2a5E",
-                "stakeName": "stBTC",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/stbtc.png",
-                "currency": "stBTC",
-                "restakeAssetNumber": 0.000150000000000000,
-                "tvl": 17.380449681384609000000000000000000000000000000000,
-                "rewards": [
-                    {
-                        "key": "PellPoints",
-                        "value": "1.15X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            },
-            {
-                "chainId": 1116,
-                "strategyAddress": "0x1F6b05eb565cb596952E991Db4614A29F80e7d71",
-                "stakeName": "stCORE",
-                "stakeIcon": "https://dchsaf64zopar.cloudfront.net/coins/stcore.png",
-                "currency": "stCORE",
-                "restakeAssetNumber": 7894.709541585211381941,
-                "tvl": 7898.516772499998450904932808276912753800000000000000,
-                "rewards": [
-                    {
-                        "key": "Pell Points",
-                        "value": "1.50X",
-                        "type": 1
-                    }
-                ],
-                "tagType": null,
-                "chainType": 1
-            }
-        ],
-        "total": 10,
-        "size": 20,
-        "current": 1,
-        "orders": [],
-        "optimizeCountSql": true,
-        "hitCount": false,
-        "countId": null,
-        "maxLimit": null,
-        "searchCount": true,
-        "pages": 1
-    }
-}
-*/
-
 // ------------------- Tool -------------------
 export const getDefiProtocolsStats = tool({
   description:
@@ -523,7 +310,7 @@ export const getDefiProtocolsStats = tool({
     }
 
     // console.log("res from colend --- ", colendSummary);
-    console.log("res from pell --- ", pellSummary);
+    // console.log("res from pell --- ", pellSummary);
     // --- Return unified ---
     return {
       results: [

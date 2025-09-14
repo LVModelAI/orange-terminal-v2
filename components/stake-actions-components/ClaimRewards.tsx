@@ -11,15 +11,10 @@ import { CheckCircleFillIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { ClaimRewardsComponentProps } from "@/lib/ai/tools/core-staking-actions/makeClaimRewardsTransaction";
 import {
+  chainIdToPledgeAgent,
   MAINNET_PLEDGEAGENT_CONTRACT_ADDRESS,
   TESTNET_PLEDGEAGENT_CONTRACT_ADDRESS,
 } from "@/lib/constants";
-
-// Replace with your actual PledgeAgent addresses
-const chainIdToPledgeAgent: Record<number, string> = {
-  1114: TESTNET_PLEDGEAGENT_CONTRACT_ADDRESS,
-  1116: MAINNET_PLEDGEAGENT_CONTRACT_ADDRESS,
-};
 
 const pledgeAgentAbi = [
   {

@@ -1,3 +1,4 @@
+import { CHAIN_ID } from "@/lib/constants";
 import { ChatMessage } from "@/lib/types";
 import { toWei } from "@/lib/utils";
 import { UseChatHelpers } from "@ai-sdk/react";
@@ -14,8 +15,7 @@ export type StakeComponentProps = {
 };
 
 export const makeStakeCoreTransaction = tool({
-  description:
-    "Make a transaction object on the Core blockchain. Pass the receiver,recever ens name if avalaible, sender, amount (in human-readable value) like 1.5 core, and chainId. The chainId is 1116 for the Core blockchain.",
+  description: `Make a transaction object on the Core blockchain. Pass the receiver,recever ens name if avalaible, sender, amount (in human-readable value) like 1.5 core, and chainId. The chainId is ${CHAIN_ID} for the Core blockchain.`,
   inputSchema: z.object({
     candidateAddress: z.string().describe("The candidate (validator) address"),
     candidateName: z.string().describe("the candidate (validator) name"),
@@ -24,7 +24,7 @@ export const makeStakeCoreTransaction = tool({
       .describe(
         "The amount of token to stake (in human-readable value) like 1.5 core"
       ),
-    chainId: z.number().default(1116),
+    chainId: z.number().default(CHAIN_ID),
   }),
   execute: async ({ candidateAddress, candidateName, value, chainId }) => {
     const valueInWei = toWei(value);

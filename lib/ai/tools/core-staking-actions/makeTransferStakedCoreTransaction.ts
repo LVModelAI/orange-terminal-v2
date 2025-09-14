@@ -1,3 +1,4 @@
+import { CHAIN_ID } from "@/lib/constants";
 import { ChatMessage } from "@/lib/types";
 import { toWei } from "@/lib/utils";
 import { UseChatHelpers } from "@ai-sdk/react";
@@ -16,8 +17,7 @@ export type TransferStakedCoreTransactionProps = {
 };
 
 export const makeTransferStakedCoreTransaction = tool({
-  description:
-    "Create a transaction object to transfer staked CORE tokens from one validator to another. Pass the source and target candidate addresses, names, value to transfer (in human-readable value) like 1.5 core, and chainId (default is 1116).",
+  description: `Create a transaction object to transfer staked CORE tokens from one validator to another. Pass the source and target candidate addresses, names, value to transfer (in human-readable value) like 1.5 core, and chainId (default is ${CHAIN_ID}).`,
   inputSchema: z.object({
     sourceCandidateAddress: z
       .string()
@@ -34,7 +34,7 @@ export const makeTransferStakedCoreTransaction = tool({
       .describe(
         "The amount of CORE to transfer (in human-readable value) like 1.5 core"
       ),
-    chainId: z.number().default(1116),
+    chainId: z.number().default(CHAIN_ID),
   }),
   execute: async ({
     sourceCandidateAddress,

@@ -327,7 +327,7 @@ use the makeCoreScanApiCall tool to make an api fetch call to the api endpoint. 
 // protocols stats
 export const getDefiProtocolsStatsPrompt = `
 The tool getDefiProtocolsStats fetches real-time DeFi and staking data for the Core ecosystem.
-It merges three sources: Core DAO validator stats, Colend protocol pool stats, and DeSyn protocol ETF/fund stats.
+It merges three sources: Core DAO validator stats, Colend protocol pool stats, DeSyn protocol ETF/fund stats and Pell protocol restaking stats.
 Each protocol section returns both:
 - raw (full API response for reference)
 - summary (trimmed fields optimized for DeFi strategy and decision-making)
@@ -383,6 +383,7 @@ Use this tool whenever the user asks about:
 - Validator rewards, hybrid score, or realtime performance
 - Colend protocol pools, APY, or TVL on Core
 - DeSyn protocol funds, strategies, or ETF pool performance
+- Pell protocol restaking stats
 - Yield opportunities or DeFi performance comparisons across validators, pools, and ETF funds
 - General "show me stats / overview" queries for Core DeFi
 
