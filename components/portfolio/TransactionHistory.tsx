@@ -36,7 +36,16 @@ export default function TransactionHistoryComp({
   }
   if (!data)
     return <div className="py-4 text-sm text-white">No transactions found</div>;
+  console.log("data", data);
 
+  // @ts-ignore
+  if (data.error) {
+    return (
+      <div className="py-4 text-sm text-red-500">
+        Failed to load transaction history.
+      </div>
+    );
+  }
   return (
     <div className="space-y-4">
       {data.history_list.map((tx) => {

@@ -39,9 +39,7 @@ export default function CoreOfficialStakingStats({
       {!isLoading && !error && (
         <>
           {!staking ? (
-            <div className="text-gray-600 dark:text-gray-400 py-3">
-              No staking data.
-            </div>
+            <div className="py-4 text-sm text-red-500">No staking data.</div>
           ) : (
             <div className="space-y-1 text-sm pt-2">
               <div className="flex justify-between">

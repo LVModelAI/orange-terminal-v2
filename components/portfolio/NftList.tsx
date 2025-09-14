@@ -100,7 +100,13 @@ export default function NFTList({ address }: { address: string }) {
   }
 
   const nfts = data ?? [];
-
+  // console.log("nfts", nfts);
+  // @ts-ignore
+  if (nfts.error) {
+    return (
+      <div className="py-4 text-sm text-red-500">Failed to load NFTs.</div>
+    );
+  }
   return (
     <section className="w-full">
       <div className="mb-3 flex items-center justify-between">
@@ -116,12 +122,13 @@ export default function NFTList({ address }: { address: string }) {
         </div>
       ) : (
         <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {nfts.map((nft) => (
-            <NFTCard
-              key={`${nft.id}-${nft.contract_id}-${nft.inner_id}`}
-              nft={nft}
-            />
-          ))}
+          {nfts.length > 0 &&
+            nfts.map((nft) => (
+              <NFTCard
+                key={`${nft.id}-${nft.contract_id}-${nft.inner_id}`}
+                nft={nft}
+              />
+            ))}
         </div>
       )}
     </section>

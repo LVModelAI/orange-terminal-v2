@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "static.debank.com",
       },
+      {
+        protocol: "https",
+        hostname: "dchsaf64zopar.cloudfront.net",
+      },
     ],
   },
 };
