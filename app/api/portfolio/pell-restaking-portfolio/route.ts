@@ -4,7 +4,7 @@ import { z } from "zod";
 import { CHAIN_ID, PELL_PORTFOLIO_BASE_API } from "@/lib/constants";
 
 // ----- Types -----
-export const PellTokenSchema = z.object({
+const PellTokenSchema = z.object({
   chainId: z.number(),
   stakeName: z.string(),
   pointDesc: z.string().nullable().optional(),
