@@ -16,22 +16,8 @@ import {
   CHAIN_ID,
   PELL_ADMIN_UPGRADEABLILITY_PROXY_CONTRACT_ADDRESS,
 } from "@/lib/constants";
+import { PellStakeErc20Props } from "@/lib/ai/tools/pell-restaking-actions/pellStakeErc20";
 
-/** ---------- Types (inline, replace with your own if you already have them) ---------- */
-export type PellStakeErc20TxProps = {
-  tokenName: string; // e.g. "USDC"
-  tokenAddress: string; // ERC-20
-  strategyAddress: string; // Pell strategy/receiver of deposit
-  amount: string; // human-readable amount, e.g. "0.5"
-};
-
-export type PellStakeErc20Props = {
-  tx: PellStakeErc20TxProps;
-  // sendMessage: (msg: {
-  //   role: "system" | "user" | "assistant";
-  //   parts: { type: "text"; text: string }[];
-  // }) => void;
-};
 /** ------------------------------------------------------------------------------- */
 
 const CORE_SCAN_TX = "https://scan.coredao.org/tx/";
@@ -80,10 +66,7 @@ type Phase =
   | "success"
   | "error";
 
-const PellStakeErc20: React.FC<PellStakeErc20Props> = ({
-  tx,
-  // sendMessage
-}) => {
+const PellStakeErc20: React.FC<PellStakeErc20Props> = ({ tx, sendMessage }) => {
   const { isConnected, address: from } = useAppKitAccount();
 
   const token = tx.tokenAddress as Address;
@@ -174,19 +157,16 @@ const PellStakeErc20: React.FC<PellStakeErc20Props> = ({
     if (msg.includes("User rejected the request")) {
       setErrorMsg("User rejected the request");
       setPhase("error");
-      // sendMessage({
-      //   role: "system",
-      //   parts: [{ type: "text", text: "User cancelled the transaction." }],
-      // });
+      sendMessage({
+        role: "system",
+        parts: [{ type: "text", text: "User cancelled the transaction." }],
+      });
     } else {
       console.error("[writeContract] error:", sendError);
       setErrorMsg(msg);
       setPhase("error");
     }
-  }, [
-    sendError,
-    // sendMessage
-  ]);
+  }, [sendError, sendMessage]);
 
   // On approve confirmed
   useEffect(() => {
@@ -304,15 +284,15 @@ const PellStakeErc20: React.FC<PellStakeErc20Props> = ({
 
       if (!sentStakeRef.current) {
         sentStakeRef.current = true;
-        // sendMessage({
-        //   role: "system",
-        //   parts: [
-        //     {
-        //       type: "text",
-        //       text: `Successfully staked ${tx.amount} ${tx.tokenName} in Pell`,
-        //     },
-        //   ],
-        // });
+        sendMessage({
+          role: "system",
+          parts: [
+            {
+              type: "text",
+              text: `Successfully staked ${tx.amount} ${tx.tokenName} in Pell`,
+            },
+          ],
+        });
       }
     }
   }, [
@@ -321,7 +301,7 @@ const PellStakeErc20: React.FC<PellStakeErc20Props> = ({
     stakeWait.isSuccess,
     tx.amount,
     tx.tokenName,
-    // sendMessage,
+    sendMessage,
   ]);
 
   function ButtonContent() {

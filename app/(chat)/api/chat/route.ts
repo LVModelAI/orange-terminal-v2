@@ -66,6 +66,10 @@ import { colendSupplyErc20 } from "@/lib/ai/tools/colend/colendSupplyErc20";
 import { colendWithdrawErc20 } from "@/lib/ai/tools/colend/colendWithdrawErc20";
 import { colendWithdrawCore } from "@/lib/ai/tools/colend/colendWithdrawCore";
 
+// pell
+import { pellStakeErc20 } from "@/lib/ai/tools/pell-restaking-actions/pellStakeErc20";
+import { pellUnstakeErc20 } from "@/lib/ai/tools/pell-restaking-actions/pellUnstakeErc20";
+
 //swaps
 import { tokenSwapTransaction } from "@/lib/ai/tools/swap-actions/tokenSwapTransaction";
 
@@ -205,6 +209,8 @@ export async function POST(request: Request) {
                   "colendWithdrawErc20",
                   "colendWithdrawCore",
                   "tokenSwapTransaction",
+                  "pellStakeErc20",
+                  "pellUnstakeErc20",
                 ],
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
@@ -229,6 +235,8 @@ export async function POST(request: Request) {
             colendWithdrawErc20,
             colendWithdrawCore,
             tokenSwapTransaction,
+            pellStakeErc20,
+            pellUnstakeErc20,
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,

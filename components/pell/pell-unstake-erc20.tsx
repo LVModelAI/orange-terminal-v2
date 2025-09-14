@@ -1,4 +1,4 @@
-// pellUnstakeErc20.tsx
+// PellUnstakeErc20.tsx
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -14,7 +14,7 @@ import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
 import { CHAIN_ID } from "@/lib/constants";
 
-export type PellUnstakeTxProps = {
+export type PellUnstakeErc20TxProps = {
   // Pell params
   tokenName: string;
   tokenAddress: string;
@@ -23,11 +23,11 @@ export type PellUnstakeTxProps = {
 };
 
 export type PellUnstakeErc20Props = {
-  tx: PellUnstakeTxProps;
-  // sendMessage: (msg: {
-  //   role: "system" | "user" | "assistant";
-  //   parts: { type: "text"; text: string }[];
-  // }) => void;
+  tx: PellUnstakeErc20TxProps;
+  sendMessage: (msg: {
+    role: "system" | "user" | "assistant";
+    parts: { type: "text"; text: string }[];
+  }) => void;
 };
 
 const CORE_SCAN_TX = "https://scan.coredao.org/tx/";
@@ -74,9 +74,9 @@ const erc20MetaAbi = [
 
 type Phase = "idle" | "awaiting_wallet" | "queuing" | "success" | "error";
 
-const pellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
+const PellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
   tx,
-  // sendMessage,
+  sendMessage,
 }) => {
   const { isConnected, address: from } = useAppKitAccount();
 
@@ -160,19 +160,16 @@ const pellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
     if (msg.includes("User rejected the request")) {
       setErrorMsg("User rejected the request");
       setPhase("error");
-      // sendMessage({
-      //   role: "system",
-      //   parts: [{ type: "text", text: "User cancelled the transaction." }],
-      // });
+      sendMessage({
+        role: "system",
+        parts: [{ type: "text", text: "User cancelled the transaction." }],
+      });
     } else {
       console.error("[queueWithdrawals] error:", sendError);
       setErrorMsg(msg);
       setPhase("error");
     }
-  }, [
-    sendError,
-    // sendMessage
-  ]);
+  }, [sendError, sendMessage]);
 
   // Start flow: queueWithdrawals (single tx)
   const handleUnstakeFlow = async () => {
@@ -227,15 +224,15 @@ const pellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
         const humanText = tx.amount
           ? `${tx.amount}`
           : `${parsedAmount ? parsedAmount.toString() : "?"} (wei)`;
-        // sendMessage({
-        //   role: "system",
-        //   parts: [
-        //     {
-        //       type: "text",
-        //       text: `Withdrawal queued on Pell for ${humanText}.`,
-        //     },
-        //   ],
-        // });
+        sendMessage({
+          role: "system",
+          parts: [
+            {
+              type: "text",
+              text: `Withdrawal queued on Pell for ${humanText}. Tokens will be available to withdraw in 7 days`,
+            },
+          ],
+        });
       }
     }
   }, [
@@ -244,7 +241,7 @@ const pellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
     queueWait.isSuccess,
     parsedAmount,
     tx.amount,
-    // sendMessage,
+    sendMessage,
   ]);
 
   const isAwaitingQueue =
@@ -279,7 +276,7 @@ const pellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
         </>
       );
     }
-    return <>Queue Withdrawal</>;
+    return <>Unstake</>;
   }
 
   return (
@@ -353,4 +350,4 @@ const pellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
   );
 };
 
-export default pellUnstakeErc20;
+export default PellUnstakeErc20;

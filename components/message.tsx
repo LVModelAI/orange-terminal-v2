@@ -44,6 +44,11 @@ import { SLIPPAGE_FOR_SWAPS } from "@/lib/constants";
 import { SuggestionAwareMarkdown } from "@/components/SuggestionAwareMarkdown";
 import { InfoIcon } from "lucide-react";
 import { UnDelegateComponentProps } from "@/lib/ai/tools/core-staking-actions/makeUnDelegateCoreTransaction";
+import { PellStakeErc20TxProps } from "@/lib/ai/tools/pell-restaking-actions/pellStakeErc20";
+import PellStakeErc20 from "@/components/pell/pell-stake-erc20";
+import PellUnstakeErc20, {
+  PellUnstakeErc20TxProps,
+} from "@/components/pell/pell-unstake-erc20";
 
 // Type narrowing is handled by TypeScript's control flow analysis
 // The AI SDK provides proper discriminated unions for tool calls
@@ -707,6 +712,53 @@ const PurePreviewMessage = ({
                       tokenOut={tx.tokenOut as `0x${string}`}
                       amount={tx.amount}
                       slippagePct={tx.slippage}
+                      sendMessage={sendMessage}
+                    />
+                  );
+                }
+              }
+
+              // pell
+              if (type === "tool-pellStakeErc20") {
+                const { toolCallId, state } = part;
+                if (state === "input-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader loadingMessage="Making stake transaction on pell..." />
+                    </div>
+                  );
+                }
+
+                if (state === "output-available") {
+                  const { output } = part;
+                  const tx = output as PellStakeErc20TxProps;
+                  return (
+                    <PellStakeErc20
+                      tx={tx}
+                      key={toolCallId}
+                      sendMessage={sendMessage}
+                    />
+                  );
+                }
+              }
+
+              if (type === "tool-pellUnstakeErc20") {
+                const { toolCallId, state } = part;
+                if (state === "input-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader loadingMessage="Making unstake transaction on pell..." />
+                    </div>
+                  );
+                }
+
+                if (state === "output-available") {
+                  const { output } = part;
+                  const tx = output as PellUnstakeErc20TxProps;
+                  return (
+                    <PellUnstakeErc20
+                      tx={tx}
+                      key={toolCallId}
                       sendMessage={sendMessage}
                     />
                   );
