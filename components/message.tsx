@@ -764,6 +764,28 @@ const PurePreviewMessage = ({
                   );
                 }
               }
+
+              if (type === "tool-getPellStrategies") {
+                const { toolCallId, state } = part;
+                if (state === "input-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader loadingMessage="Getting Pell strategies..." />
+                    </div>
+                  );
+                }
+
+                if (state === "output-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader
+                        loadingMessage="Pell strategies fetched..."
+                        isFinished
+                      />
+                    </div>
+                  );
+                }
+              }
             })}
 
             {!isReadonly && (

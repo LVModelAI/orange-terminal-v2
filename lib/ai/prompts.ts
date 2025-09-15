@@ -901,10 +901,25 @@ Remember:
 - Tokens will be locked for 7 days after unstaking before they can be withdrawn.
 `;
 
+export const pellGetAllStrategiesPrompt = `
+This tool fetches staking strategies from  Pell.What it does
+Use this tool whenever you need up-to-date information about Pell staking strategies on Core chain (chainId 1116).
+
+Returns only the records array from the Pell API response.
+Each record includes information about a Pell staking strategy, such as:
+strategyAddress (the contract address of the strategy)
+stakeName (name of the stake, like stCORE, uBTC, etc.)
+stakeIcon (icon URL for the asset)
+currency (the token symbol, e.g. BTC, CORE)
+restakeAsset (amount restaked in that strategy, formatted)
+tvl (total value locked, formatted)
+rewards (list of reward multipliers/points like “1.5X”, “3XP”)
+`;
+
 export const systemPrompt = ({
   selectedChatModel,
 }: {
   selectedChatModel: string;
 }) => {
-  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}`;
+  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}\n\n${pellGetAllStrategiesPrompt}`;
 };
