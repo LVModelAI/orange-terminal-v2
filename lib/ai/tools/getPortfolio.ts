@@ -333,7 +333,7 @@ export const getPortfolio = tool({
     // console.log("staking --- ", staking);
     // console.log("nfts --- ", nfts);
     // console.log("tokens --- ", tokens);
-    console.log("pellRestakingPortfolio --- ", pellRestakingPortfolio);
+    // console.log("pellRestakingPortfolio --- ", pellRestakingPortfolio);
 
     return {
       protocols,
