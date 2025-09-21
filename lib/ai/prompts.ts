@@ -901,6 +901,30 @@ Remember:
 - Tokens will be locked for 7 days after unstaking before they can be withdrawn.
 `;
 
+export const pellWithdrawErc20Prompt = `
+Use pellWithdrawErc20 when the user explicitly wants to withdraw ERC20 tokens that are already unlocked (available) from a Pell strategy.
+
+## Preconditions & Data Gathering
+- Determine the Pell strategy address and the ERC20 token address for the position.
+- Gas is paid in CORE. Recommend keeping at least 0.5 CORE for fees.
+
+## Parameter mapping for pellWithdrawErc20
+Input schema:
+- strategy → Pell strategy contract address
+- tokenAddress → ERC20 contract address
+
+## Flow Guidance
+1) Confirm with the user they want to withdraw the available tokens now.
+3) Call pellWithdrawErc20 (the UI will fetch queued data, build arrays, and perform on-chain call when user clicks the button):
+
+4) On success, inform the user that tokens were received in their wallet and suggest reloading portfolio.
+
+## Edge Cases & Safety
+- If no queued withdrawals are available (i.e., not past unlock time), explain that nothing is available yet and when it will be.
+- If addresses are missing (strategy/token), ask the user to provide them.
+- Do not proceed if the user lacks sufficient CORE for gas.
+`;
+
 export const pellGetAllStrategiesPrompt = `
 This tool fetches staking strategies from  Pell.What it does
 Use this tool whenever you need up-to-date information about Pell staking strategies on Core chain (chainId 1116).
@@ -921,5 +945,5 @@ export const systemPrompt = ({
 }: {
   selectedChatModel: string;
 }) => {
-  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}\n\n${pellGetAllStrategiesPrompt}`;
+  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}\n\n${pellWithdrawErc20Prompt}\n\n${pellGetAllStrategiesPrompt}`;
 };

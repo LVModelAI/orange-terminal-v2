@@ -49,6 +49,8 @@ import PellStakeErc20 from "@/components/pell/pell-stake-erc20";
 import PellUnstakeErc20, {
   PellUnstakeErc20TxProps,
 } from "@/components/pell/pell-unstake-erc20";
+import PellWithdrawErc20 from "@/components/pell/pell-withdraw-erc20";
+import { PellWithdrawErc20TxProps } from "@/lib/ai/tools/pell-restaking-actions/pellWithdrawErc20";
 
 // Type narrowing is handled by TypeScript's control flow analysis
 // The AI SDK provides proper discriminated unions for tool calls
@@ -757,6 +759,29 @@ const PurePreviewMessage = ({
                   const tx = output as PellUnstakeErc20TxProps;
                   return (
                     <PellUnstakeErc20
+                      tx={tx}
+                      key={toolCallId}
+                      sendMessage={sendMessage}
+                    />
+                  );
+                }
+              }
+
+              if (type === "tool-pellWithdrawErc20") {
+                const { toolCallId, state } = part;
+                if (state === "input-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader loadingMessage="Withdrawing tokens from pell..." />
+                    </div>
+                  );
+                }
+
+                if (state === "output-available") {
+                  const { output } = part;
+                  const tx = output as PellWithdrawErc20TxProps;
+                  return (
+                    <PellWithdrawErc20
                       tx={tx}
                       key={toolCallId}
                       sendMessage={sendMessage}

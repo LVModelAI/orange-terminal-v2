@@ -12,7 +12,7 @@ import { Address, parseUnits } from "viem";
 import { useAppKitAccount } from "@reown/appkit/react";
 import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
-import { CHAIN_ID } from "@/lib/constants";
+import { CHAIN_ID, PELL_WITHDRAWALS_CONTRACT } from "@/lib/constants";
 
 export type PellUnstakeErc20TxProps = {
   // Pell params
@@ -31,8 +31,6 @@ export type PellUnstakeErc20Props = {
 };
 
 const CORE_SCAN_TX = "https://scan.coredao.org/tx/";
-const PELL_WITHDRAWALS_CONTRACT =
-  "0x230B442c0802fE83DAf3d2656aaDFD16ca1E1F66" as Address;
 
 // queueWithdrawals((address[] strategies, uint256[] shares, address withdrawer)[] queuedWithdrawalParams)
 const pellWithdrawalsAbi = [

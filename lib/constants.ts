@@ -78,6 +78,8 @@ export const SLIPPAGE_FOR_SWAPS = "0.5";
 
 // --- Pell ---
 export const PELL_ADMIN_UPGRADEABLILITY_PROXY_CONTRACT_ADDRESS =
-  "0x00b67e4805138325ce871d5e27dc15f994681bc1";
+  "0x00b67e4805138325ce871d5e27dc15f994681bc1"; // for staking erc20
 export const PELL_PORTFOLIO_BASE_API =
   "https://api.pell.network/v1/userStakeList";
+export const PELL_WITHDRAWALS_CONTRACT =
+  "0x230B442c0802fE83DAf3d2656aaDFD16ca1E1F66"; // for unstaking and withdrawingerc20
