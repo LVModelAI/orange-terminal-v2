@@ -12,7 +12,11 @@ function formatHealthRate(value: number): string {
 }
 
 export function ProtocolDetails({ protocol }: { protocol: ComplexProtocol }) {
-  console.log("protocol ---- ", protocol);
+  // console.log("protocol ---- ", protocol);
+
+  if (protocol.id === "core_pell") {
+    return null;
+  }
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-xl p-4 shadow-sm mb-6">
       {/* Header */}

@@ -42,7 +42,7 @@ function PureMessages({
   });
 
   useDataStream();
-
+  console.log("messages ---- ", messages);
   return (
     <div
       ref={messagesContainerRef}
