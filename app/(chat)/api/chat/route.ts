@@ -105,6 +105,7 @@ export async function POST(request: Request) {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
   } catch (_) {
+    console.log("error in chat route", _);
     return new ChatSDKError("bad_request:api").toResponse();
   }
 
@@ -179,10 +180,12 @@ export async function POST(request: Request) {
     const stream = createUIMessageStream({
       execute: ({ writer: dataStream }) => {
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
+          // ✅ use chatModel instead of languageModel
+          model: "chat-model",
           system: systemPrompt({ selectedChatModel }),
           messages: convertToModelMessages(uiMessages),
-          stopWhen: stepCountIs(10),
+          // optional: comment out stopWhen while debugging
+          // stopWhen: stepCountIs(10),
 
           toolChoice: "auto",
           experimental_activeTools:
@@ -257,6 +260,7 @@ export async function POST(request: Request) {
       },
       generateId: generateUUID,
       onFinish: async ({ messages }) => {
+        console.log("messages in chat route", messages);
         await saveMessages({
           messages: messages.map((message) => ({
             id: message.id,
