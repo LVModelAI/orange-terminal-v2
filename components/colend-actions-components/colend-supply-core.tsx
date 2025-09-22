@@ -14,10 +14,8 @@ import {
   ColendSupplyCoreTxProps,
 } from "@/lib/ai/tools/colend/colendSupplyCore";
 // import type { ColendSupplyCoreTxProps } from "@/lib/ai/tools/supply-core"; // <- use your actual path
-import { CHAIN_ID } from "@/lib/constants";
+import { CHAIN_ID, CORESCAN_BASE_URL } from "@/lib/constants";
 import { toWei } from "@/lib/utils";
-
-const CORE_SCAN_BASE = "https://scan.coredao.org/tx/";
 
 const gatewayAbi = [
   {
@@ -173,7 +171,7 @@ const ColendSupplyCore: React.FC<ColendSupplyCoreProps> = ({
           <p className="text-gray-500 text-sm">on Colend</p>
           <p>
             <Link
-              href={`${CORE_SCAN_BASE}${txHash}`}
+              href={`${CORESCAN_BASE_URL}/tx/${txHash}`}
               target="_blank"
               className="underline text-blue-600 text-sm"
             >

@@ -19,6 +19,7 @@ import {
   USDT_TOKEN_ADDRESS,
   STCORE_TOKEN_ADDRESS,
   ALGEBRA_FACTORY,
+  CORESCAN_BASE_URL,
 } from "@/lib/constants";
 import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
@@ -891,7 +892,7 @@ export default function TokenSwap({
           {swapReceipt?.transactionHash && (
             <p>
               <Link
-                href={`https://scan.coredao.org/tx/${swapReceipt?.transactionHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${swapReceipt?.transactionHash}`}
                 target="_blank"
                 className="underline text-blue-600 text-sm"
               >

@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
 import { CheckCircleFillIcon } from "@/components/icons";
+import { CORESCAN_BASE_URL } from "@/lib/constants";
 
 export type TransactionComponentProps = {
   from: string;
@@ -205,7 +206,7 @@ const TransactionComponent: React.FC<TransactionComponentProps> = ({
           <p className="text-gray-400 text-xs mt-2">on {networkName}</p>
           <p>
             <Link
-              href={`https://scan.coredao.org/tx/${txHash}`}
+              href={`${CORESCAN_BASE_URL}/tx/${txHash}`}
               target="_blank"
               className="underline text-blue-600 text-sm"
             >

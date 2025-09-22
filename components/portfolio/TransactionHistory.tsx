@@ -4,6 +4,7 @@ import useSWR from "swr";
 import Image from "next/image";
 import { format } from "date-fns";
 import type { TransactionHistory } from "@/lib/types/debank";
+import { CORESCAN_BASE_URL } from "@/lib/constants";
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
@@ -63,7 +64,7 @@ export default function TransactionHistoryComp({
 
         // Shorten txn hash
         const shortHash = `${tx.id.slice(0, 6)}...${tx.id.slice(-4)}`;
-        const scanUrl = `https://scan.coredao.org/tx/${tx.id}`;
+        const scanUrl = `${CORESCAN_BASE_URL}/tx/${tx.id}`;
 
         return (
           <div key={tx.id} className="border-b pb-3">

@@ -14,13 +14,12 @@ import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
 import {
   CHAIN_ID,
+  CORESCAN_BASE_URL,
   PELL_ADMIN_UPGRADEABLILITY_PROXY_CONTRACT_ADDRESS,
 } from "@/lib/constants";
 import { PellStakeErc20Props } from "@/lib/ai/tools/pell-restaking-actions/pellStakeErc20";
 
 /** ------------------------------------------------------------------------------- */
-
-const CORE_SCAN_TX = "https://scan.coredao.org/tx/";
 
 // Minimal ABI for Pell deposit.
 // Event observed: Deposit(address staker, address token, address strategy, uint256 shares)
@@ -377,7 +376,7 @@ const PellStakeErc20: React.FC<PellStakeErc20Props> = ({ tx, sendMessage }) => {
             <div>
               Approve tx:{" "}
               <Link
-                href={`${CORE_SCAN_TX}${lastApproveHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastApproveHash}`}
                 target="_blank"
                 className="underline text-blue-500"
               >
@@ -389,7 +388,7 @@ const PellStakeErc20: React.FC<PellStakeErc20Props> = ({ tx, sendMessage }) => {
             <div>
               Stake tx:{" "}
               <Link
-                href={`${CORE_SCAN_TX}${lastStakeHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastStakeHash}`}
                 target="_blank"
                 className="underline text-blue-500"
               >
@@ -416,7 +415,7 @@ const PellStakeErc20: React.FC<PellStakeErc20Props> = ({ tx, sendMessage }) => {
           {lastStakeHash && (
             <p>
               <Link
-                href={`${CORE_SCAN_TX}${lastStakeHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastStakeHash}`}
                 target="_blank"
                 className="underline text-blue-600 text-sm"
               >

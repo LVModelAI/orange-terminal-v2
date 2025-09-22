@@ -9,6 +9,14 @@ export const DUMMY_PASSWORD = generateDummyPassword();
 export const CHAIN_ID = 1116;
 export const MAX_TRANSACTION_AMOUNT = 1000;
 
+// walletconnect rpc base url
+export const WALLETCONNECT_RPC_BASE_URL = "https://rpc.walletconnect.org/v1";
+
+// corescan base url
+export const CORESCAN_BASE_URL = "https://scan.coredao.org";
+//core scan rpc url
+export const CORESCAN_RPC_URL = "https://rpc.coredao.org";
+
 // --- Token addresses ---
 // --- Core Ecosystem Tokens ---
 export const CORE_TOKEN_ADDRESS = "0x0000000000000000000000000000000000000000";
@@ -39,6 +47,16 @@ export const PELL_API =
   "https://api.pell.network/v1/stakeListByPage?page=1&pageSize=20&params=1116";
 
 // --- Staking, undelegate and transfer core on coreDao ---
+// get staking portfolio
+export const CORE_STAKING_PORTFOLIO_API =
+  "https://staking-api.coredao.org/staking/summary/core";
+// get rewards details
+export const CORE_STAKING_REWARDS_DETAIL_API =
+  "https://staking-api.coredao.org/staking/rewards/detail";
+// for getting delegated core for each validator
+export const CORE_STAKING_DELEGATED_CORE_API =
+  "https://stake.coredao.org/api/staking/search_delegator";
+
 // for staking, undelegate and transfer core
 export const TESTNET_COREAGENT_CONTRACT_ADDRESS =
   "0x0000000000000000000000000000000000001011";
@@ -77,9 +95,18 @@ export const ALGEBRA_FACTORY =
 export const SLIPPAGE_FOR_SWAPS = "0.5";
 
 // --- Pell ---
+// for staking erc20
 export const PELL_ADMIN_UPGRADEABLILITY_PROXY_CONTRACT_ADDRESS =
-  "0x00b67e4805138325ce871d5e27dc15f994681bc1"; // for staking erc20
+  "0x00b67e4805138325ce871d5e27dc15f994681bc1";
+
+//for fetching pell portfolio of the user's wallet
 export const PELL_PORTFOLIO_BASE_API =
   "https://api.pell.network/v1/userStakeList";
+
+// for unstaking and withdrawing erc20
 export const PELL_WITHDRAWALS_CONTRACT =
-  "0x230B442c0802fE83DAf3d2656aaDFD16ca1E1F66"; // for unstaking and withdrawingerc20
+  "0x230B442c0802fE83DAf3d2656aaDFD16ca1E1F66";
+
+// for fetching the queued withdrawals
+export const PELL_WITHDRAWALS_BASE_API =
+  "https://api.pell.network/v1/withdrawalQueuedList";

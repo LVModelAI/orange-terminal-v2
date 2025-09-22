@@ -1,6 +1,7 @@
 import { tool } from "ai";
 import { z } from "zod";
 import { formatEther } from "viem";
+import { CORE_STAKING_DELEGATED_CORE_API } from "@/lib/constants";
 
 type ApiRecord = {
   operatorAddressHash: string;
@@ -24,18 +25,15 @@ export const getDelegatedCoreForEachValidator = tool({
   execute: async ({ walletAddress }: { walletAddress: string }) => {
     const addressHash = walletAddress.toLowerCase();
 
-    const res = await fetch(
-      "https://stake.coredao.org/api/staking/search_delegator",
-      {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          pageNum: 1,
-          pageSize: "100",
-          addressHash,
-        }),
-      }
-    );
+    const res = await fetch(CORE_STAKING_DELEGATED_CORE_API, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        pageNum: 1,
+        pageSize: "100",
+        addressHash,
+      }),
+    });
 
     if (!res.ok) {
       throw new Error(`Core staking API error: HTTP ${res.status}`);

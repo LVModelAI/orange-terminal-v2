@@ -1,4 +1,5 @@
 // app/api/portfolio/staking/route.ts
+import { CORE_STAKING_PORTFOLIO_API } from "@/lib/constants";
 import { NextResponse } from "next/server";
 
 export type CleanedStakingPortfolio = {
@@ -34,7 +35,7 @@ async function getStakingPortfolio(
   walletAddress: string
 ): Promise<CleanedStakingPortfolio | null> {
   try {
-    const url = new URL("https://staking-api.coredao.org/staking/summary/core");
+    const url = new URL(CORE_STAKING_PORTFOLIO_API);
     url.searchParams.set("coreAddress", walletAddress);
     url.searchParams.set("address", walletAddress);
     const apiKey = process.env.CORE_SCAN_API_KEY;

@@ -12,7 +12,11 @@ import { Address, parseUnits } from "viem";
 import { useAppKitAccount } from "@reown/appkit/react";
 import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
-import { CHAIN_ID, PELL_WITHDRAWALS_CONTRACT } from "@/lib/constants";
+import {
+  CHAIN_ID,
+  CORESCAN_BASE_URL,
+  PELL_WITHDRAWALS_CONTRACT,
+} from "@/lib/constants";
 
 export type PellUnstakeErc20TxProps = {
   // Pell params
@@ -29,8 +33,6 @@ export type PellUnstakeErc20Props = {
     parts: { type: "text"; text: string }[];
   }) => void;
 };
-
-const CORE_SCAN_TX = "https://scan.coredao.org/tx/";
 
 // queueWithdrawals((address[] strategies, uint256[] shares, address withdrawer)[] queuedWithdrawalParams)
 const pellWithdrawalsAbi = [
@@ -310,7 +312,7 @@ const PellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
             <div>
               Tx:{" "}
               <Link
-                href={`${CORE_SCAN_TX}${lastQueueHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastQueueHash}`}
                 target="_blank"
                 className="underline text-blue-500"
               >
@@ -334,7 +336,7 @@ const PellUnstakeErc20: React.FC<PellUnstakeErc20Props> = ({
           {lastQueueHash && (
             <p className="mt-2">
               <Link
-                href={`${CORE_SCAN_TX}${lastQueueHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastQueueHash}`}
                 target="_blank"
                 className="underline text-blue-600 text-sm"
               >

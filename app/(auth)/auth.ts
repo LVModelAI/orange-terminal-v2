@@ -9,6 +9,7 @@ import {
   SIWESession,
 } from "@reown/appkit-siwe";
 import { getUser, upsertUserByAddress } from "@/lib/db/queries";
+import { WALLETCONNECT_RPC_BASE_URL } from "@/lib/constants";
 
 declare module "next-auth" {
   interface Session extends SIWESession {
@@ -58,7 +59,7 @@ const providers = [
         // we are going to use https://viem.sh/docs/actions/public/verifyMessage.html
         const publicClient = createPublicClient({
           transport: http(
-            `https://rpc.walletconnect.org/v1/?chainId=${chainId}&projectId=${projectId}`
+            `${WALLETCONNECT_RPC_BASE_URL}/?chainId=${chainId}&projectId=${projectId}`
           ),
         });
         const isValid = await publicClient.verifyMessage({

@@ -12,10 +12,13 @@ import { Address } from "viem";
 import { useAppKitAccount } from "@reown/appkit/react";
 import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
-import { CHAIN_ID, PELL_WITHDRAWALS_CONTRACT } from "@/lib/constants";
+import {
+  CHAIN_ID,
+  CORESCAN_BASE_URL,
+  PELL_WITHDRAWALS_BASE_API,
+  PELL_WITHDRAWALS_CONTRACT,
+} from "@/lib/constants";
 import { PellWithdrawErc20Props } from "@/lib/ai/tools/pell-restaking-actions/pellWithdrawErc20";
-
-const CORE_SCAN_TX = "https://scan.coredao.org/tx/";
 
 // ABI fragment for completeQueuedWithdrawals
 const pellWithdrawalsAbi = [
@@ -142,7 +145,7 @@ const PellWithdrawErc20: React.FC<PellWithdrawErc20Props> = ({
     const doFetch = async () => {
       try {
         if (!isConnected || !from || !strategyAddress) return;
-        const url = `https://api.pell.network/v1/withdrawalQueuedList?chainId=${CHAIN_ID}&strategyAddress=${strategyAddress}&address=${from}`;
+        const url = `${PELL_WITHDRAWALS_BASE_API}?chainId=${CHAIN_ID}&strategyAddress=${strategyAddress}&address=${from}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const json = (await res.json()) as {
@@ -373,7 +376,7 @@ const PellWithdrawErc20: React.FC<PellWithdrawErc20Props> = ({
             <div>
               Tx:{" "}
               <Link
-                href={`${CORE_SCAN_TX}${lastWithdrawHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastWithdrawHash}`}
                 target="_blank"
                 className="underline text-blue-500"
               >
@@ -398,7 +401,7 @@ const PellWithdrawErc20: React.FC<PellWithdrawErc20Props> = ({
           {lastWithdrawHash && (
             <p className="mt-2">
               <Link
-                href={`${CORE_SCAN_TX}${lastWithdrawHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastWithdrawHash}`}
                 target="_blank"
                 className="underline text-blue-600 text-sm"
               >

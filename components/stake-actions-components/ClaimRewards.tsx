@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { ClaimRewardsComponentProps } from "@/lib/ai/tools/core-staking-actions/makeClaimRewardsTransaction";
 import {
   chainIdToPledgeAgent,
+  CORESCAN_BASE_URL,
   MAINNET_PLEDGEAGENT_CONTRACT_ADDRESS,
   TESTNET_PLEDGEAGENT_CONTRACT_ADDRESS,
 } from "@/lib/constants";
@@ -199,7 +200,7 @@ const ClaimRewardsComponent: React.FC<ClaimRewardsComponentProps> = ({
           <p className="text-gray-400 text-xs mt-2">on {networkName}</p>
           <p>
             <Link
-              href={`https://scan.coredao.org/tx/${txHash}`}
+              href={`${CORESCAN_BASE_URL}/tx/${txHash}`}
               target="_blank"
               className="underline text-blue-600 text-sm"
             >

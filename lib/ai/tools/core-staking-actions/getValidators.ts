@@ -1,3 +1,4 @@
+import { VALIDATORS_API } from "@/lib/constants";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -39,9 +40,7 @@ export const getValidators = tool({
   inputSchema: z.object({}),
   execute: async () => {
     console.log("fething validaotrs summary ...");
-    const apiUrl = "https://staking-api.coredao.org/staking/status/validators";
-
-    const response = await fetch(apiUrl, {
+    const response = await fetch(VALIDATORS_API, {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });

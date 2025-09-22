@@ -17,9 +17,7 @@ import {
   ColendSupplyErc20Props,
   ColendSupplyErc20TxProps,
 } from "@/lib/ai/tools/colend/colendSupplyErc20";
-import { CHAIN_ID } from "@/lib/constants";
-
-const CORE_SCAN_TX = "https://scan.coredao.org/tx/";
+import { CHAIN_ID, CORESCAN_BASE_URL } from "@/lib/constants";
 
 const poolAbi = [
   {
@@ -378,7 +376,7 @@ const ColendSupplyErc20: React.FC<ColendSupplyErc20Props> = ({
             <div>
               Approve tx:{" "}
               <Link
-                href={`${CORE_SCAN_TX}${lastApproveHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastApproveHash}`}
                 target="_blank"
                 className="underline text-blue-500"
               >
@@ -390,7 +388,7 @@ const ColendSupplyErc20: React.FC<ColendSupplyErc20Props> = ({
             <div>
               Supply tx:{" "}
               <Link
-                href={`${CORE_SCAN_TX}${lastSupplyHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastSupplyHash}`}
                 target="_blank"
                 className="underline text-blue-500"
               >
@@ -418,7 +416,7 @@ const ColendSupplyErc20: React.FC<ColendSupplyErc20Props> = ({
           {lastSupplyHash && (
             <p>
               <Link
-                href={`${CORE_SCAN_TX}${lastSupplyHash}`}
+                href={`${CORESCAN_BASE_URL}/tx/${lastSupplyHash}`}
                 target="_blank"
                 className="underline text-blue-600 text-sm"
               >

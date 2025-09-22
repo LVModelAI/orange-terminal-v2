@@ -13,6 +13,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { State, WagmiProvider } from "wagmi";
 
 import { defineChain } from "@reown/appkit/networks";
+import { CORESCAN_BASE_URL, CORESCAN_RPC_URL } from "@/lib/constants";
 
 // Setup queryClient
 const queryClient = new QueryClient();
@@ -30,12 +31,12 @@ const coreDao = /*#__PURE__*/ defineChain({
     symbol: "CORE",
   },
   rpcUrls: {
-    default: { http: ["https://rpc.coredao.org"] },
+    default: { http: [CORESCAN_RPC_URL] },
   },
   blockExplorers: {
     default: {
       name: "CoreDao",
-      url: "https://scan.coredao.org",
+      url: CORESCAN_BASE_URL,
     },
   },
   contracts: {

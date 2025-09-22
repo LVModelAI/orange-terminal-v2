@@ -1,7 +1,6 @@
+import { COLEND_API } from "@/lib/constants";
 import { tool } from "ai";
 import z from "zod";
-
-const API_URL = "https://yields.llama.fi/pools";
 
 export const getColendStats = tool({
   description:
@@ -10,7 +9,7 @@ export const getColendStats = tool({
   execute: async () => {
     try {
       console.log("getting colend stats....");
-      const res = await fetch(API_URL, { method: "GET" });
+      const res = await fetch(COLEND_API, { method: "GET" });
       if (!res.ok) {
         return { status: "error", data: [], error: `HTTP ${res.status}` };
       }

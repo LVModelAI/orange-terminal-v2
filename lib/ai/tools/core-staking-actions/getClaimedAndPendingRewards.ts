@@ -1,3 +1,7 @@
+import {
+  CORE_STAKING_REWARDS_DETAIL_API,
+  VALIDATORS_API,
+} from "@/lib/constants";
 import { tool } from "ai";
 import { z } from "zod";
 
@@ -41,9 +45,7 @@ export const getClaimedAndPendingRewards = tool({
   }),
 
   execute: async ({ walletAddress }) => {
-    const rewardsUrl = `https://staking-api.coredao.org/staking/rewards/detail?coreAddress=${walletAddress}`;
-    const validatorsUrl =
-      "https://staking-api.coredao.org/staking/status/validators";
+    const rewardsUrl = `${CORE_STAKING_REWARDS_DETAIL_API}?coreAddress=${walletAddress}`;
 
     const toCore = (weiStr: string) => Number(weiStr || "0") / 1e18;
     const toMillions = (core: number) => `${(core / 1_000_000).toFixed(2)}M`;
@@ -54,7 +56,7 @@ export const getClaimedAndPendingRewards = tool({
       // Fetch rewards and validators in parallel
       const [rewardsRes, validatorsRes] = await Promise.all([
         fetch(rewardsUrl),
-        fetch(validatorsUrl),
+        fetch(VALIDATORS_API),
       ]);
 
       if (!rewardsRes.ok) {
