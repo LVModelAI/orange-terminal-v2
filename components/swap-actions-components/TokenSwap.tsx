@@ -309,6 +309,7 @@ type UseDynamicSwapArgs = {
   tokenOut: `0x${string}`; // "0x0000000000000000000000000000000000000000" sentinel for CORE is allowed
   amountInWei: bigint;
   slippagePct: string; // e.g. "0.50" for 0.50%
+  sendMessage: UseChatHelpers<ChatMessage>["sendMessage"];
 };
 
 export function useDynamicSwap({
@@ -316,6 +317,7 @@ export function useDynamicSwap({
   tokenOut,
   amountInWei,
   slippagePct,
+  sendMessage,
 }: UseDynamicSwapArgs) {
   const { address: from } = useAppKitAccount();
 
@@ -510,6 +512,10 @@ export function useDynamicSwap({
     if (!bestPathQuote || bestPathQuote.path.length < 2) {
       toast.error("No valid path found for this swap!");
       console.warn("No valid quoted path found.");
+      sendMessage({
+        role: "system",
+        parts: [{ type: "text", text: "No valid path found for this swap!" }],
+      });
       return;
     }
 
@@ -785,7 +791,13 @@ export default function TokenSwap({
     handleApprove,
     handleSwap,
     filteredPaths,
-  } = useDynamicSwap({ tokenIn, tokenOut, amountInWei, slippagePct });
+  } = useDynamicSwap({
+    tokenIn,
+    tokenOut,
+    amountInWei,
+    slippagePct,
+    sendMessage,
+  });
 
   // console.log("is approved --- ", isApproved);
   // console.log("approveSuccess --- ", approveSuccess);

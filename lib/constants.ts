@@ -110,3 +110,7 @@ export const PELL_WITHDRAWALS_CONTRACT =
 // for fetching the queued withdrawals
 export const PELL_WITHDRAWALS_BASE_API =
   "https://api.pell.network/v1/withdrawalQueuedList";
+
+// --- B14G ---
+export const DUALCORE_VAULT_CONTRACT =
+  "0xee21ab613d30330823D35Cf91A84cE964808B83F";
