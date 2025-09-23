@@ -52,9 +52,11 @@ import { makeTransferStakedCoreTransaction } from "@/lib/ai/tools/core-staking-a
 
 // chain info
 import { getTokenAddresses } from "@/lib/ai/tools/getTokenAddresses";
-import { getCoreScanApiParams } from "@/lib/ai/tools/coreScanTools";
-import { makeCoreScanApiCall } from "@/lib/ai/tools/coreScanTools";
-import {} from "@/lib/ai/tools/coreScanTools";
+import {
+  getCoreScanApiParams,
+  makeCoreScanApiCall,
+} from "@/lib/ai/tools/coreScanTools";
+
 //portfolio
 import { getPortfolio } from "@/lib/ai/tools/getPortfolio";
 import { getTransactionHistory } from "@/lib/ai/tools/getTransactionHistory";
