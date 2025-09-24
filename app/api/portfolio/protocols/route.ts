@@ -1,5 +1,6 @@
 // app/api/portfolio/protocols/route.ts
 import { NextResponse } from "next/server";
+import { isAddress } from "viem";
 
 const DEBANK_API_BASE_URL = process.env.DEBANK_API_BASE_URL as string;
 const DEBANK_API_KEY = process.env.DEBANK_API_KEY as string;
@@ -105,6 +106,9 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Missing address" }, { status: 400 });
   }
   console.log("fetching protocols stats for ", address);
+  if (!isAddress(address)) {
+    return NextResponse.json({ error: "Invalid address" }, { status: 400 });
+  }
 
   try {
     const complexProtocols = await fetchComplexProtocols(address);

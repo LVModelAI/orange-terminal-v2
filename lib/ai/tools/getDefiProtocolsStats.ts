@@ -3,9 +3,29 @@ import {
   DESYN_API,
   PELL_API,
   VALIDATORS_API,
+  WCORE_TOKEN_ADDRESS,
+  USDC_TOKEN_ADDRESS,
+  USDT_TOKEN_ADDRESS,
+  SOLVBTC_B_ADDRESS,
+  SOLVBTC_M_ADDRESS,
+  SOLVBTC_C_ADDRESS,
+  STCORE_TOKEN_ADDRESS,
+  DUALCORE_TOKEN_ADDRESS,
 } from "@/lib/constants";
 import { tool } from "ai";
 import { z } from "zod";
+
+const tokenAddressList = [
+  { name: "CORE", address: "0x0000000000000000000000000000000000000000" },
+  { name: "WCORE", address: WCORE_TOKEN_ADDRESS },
+  { name: "USDC", address: USDC_TOKEN_ADDRESS },
+  { name: "USDT", address: USDT_TOKEN_ADDRESS },
+  { name: "SolvBTC.b", address: SOLVBTC_B_ADDRESS },
+  { name: "SolvBTC.m", address: SOLVBTC_M_ADDRESS },
+  { name: "SolvBTC.c", address: SOLVBTC_C_ADDRESS },
+  { name: "stCORE", address: STCORE_TOKEN_ADDRESS },
+  { name: "dualCORE", address: DUALCORE_TOKEN_ADDRESS },
+];
 
 // ------------------- Types -------------------
 
@@ -88,7 +108,7 @@ type DesynPoolRaw = {
   [key: string]: any;
   pay_token: string[];
   reward_en: boolean[];
-  reward_coin: string[];
+  reward_cn: string[];
 };
 
 type DesynPoolSummary = {
@@ -102,9 +122,9 @@ type DesynPoolSummary = {
   invest_label: string;
   strategy_token_label: string;
   risk_label: string;
-  pay_token: string[];
+  pay_with_token: string[];
   reward_en: boolean[];
-  reward_coin: string[];
+  reward_cn: string[];
 };
 
 type PellPoolRaw = {
@@ -212,21 +232,30 @@ const summarizeColend = (raw: ColendPoolRaw[]): ColendPoolSummary[] =>
   }));
 
 const summarizeDesyn = (raw: DesynPoolRaw[]): DesynPoolSummary[] =>
-  raw.map((p) => ({
-    pool: p.pool,
-    pool_name: p.pool_name,
-    symbol: p.symbol,
-    net_value: p.net_value,
-    net_value_per_share: p.net_value_per_share,
-    net_value_change_ratio_by_period: p.net_value_change_ratio_by_period,
-    APY: p.APY,
-    invest_label: p.invest_label,
-    strategy_token_label: p.strategy_token_label,
-    risk_label: p.risk_label,
-    pay_token: p.pay_token,
-    reward_en: p.reward_en,
-    reward_coin: p.reward_coin,
-  }));
+  raw.map((p) => {
+    const payWithTokens = (p.pay_token || []).map((addr) => {
+      const match = tokenAddressList.find(
+        (t) => t.address.toLowerCase() === addr.toLowerCase()
+      );
+      return match ? match.name : addr; // fallback to showing address
+    });
+
+    return {
+      pool: p.pool,
+      pool_name: p.pool_name,
+      symbol: p.symbol,
+      net_value: p.net_value,
+      net_value_per_share: p.net_value_per_share,
+      net_value_change_ratio_by_period: p.net_value_change_ratio_by_period,
+      APY: p.APY,
+      invest_label: p.invest_label,
+      strategy_token_label: p.strategy_token_label,
+      risk_label: p.risk_label,
+      pay_with_token: payWithTokens,
+      reward_en: p.reward_en,
+      reward_cn: p.reward_cn,
+    };
+  });
 
 const summarizePell = (raw: PellPoolRaw[]): PellPoolSummary[] => {
   //sort by tvl desc
@@ -251,7 +280,7 @@ export const getDefiProtocolsStats = tool({
     "Fetch validator stats from Core DAO, Colend protocol, and DeSyn protocol (raw + summary).",
   inputSchema: z.object({}),
   execute: async () => {
-    console.log("Fetching DeFi stats (Core DAO + Colend + DeSyn)...");
+    console.log("Fetching DeFi stats (Core DAO + Colend + DeSyn + Pell)...");
 
     // --- Core DAO Validators ---
     let coreRaw: ValidatorResponse[] = [];
@@ -261,10 +290,10 @@ export const getDefiProtocolsStats = tool({
       if (res.ok) {
         const data = await res.json();
         coreRaw = data?.data?.validatorsList || [];
-        console.log("coreRaw---- ", coreRaw);
+        // console.log("coreRaw---- ", coreRaw);
 
         validatorsSummary = summarizeCoreDaoValidators(coreRaw);
-        console.log("validatorsSummary---- ", validatorsSummary);
+        // console.log("validatorsSummary---- ", validatorsSummary);
       }
     } catch (err) {
       console.error("Error fetching Core validators:", err);
@@ -299,6 +328,7 @@ export const getDefiProtocolsStats = tool({
         const json = await res.json();
         desynRaw = json?.data?.items || [];
         desynSummary = summarizeDesyn(desynRaw);
+        console.log("desynSummary---- ", desynSummary);
       }
     } catch (err) {
       console.error("Error fetching DeSyn stats:", err);

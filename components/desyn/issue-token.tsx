@@ -171,9 +171,11 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
 
   // Fetch DeSyn pool info to compute minPoolAmountOut
   useEffect(() => {
+    if (!tx.poolAddress || !tx.amount) return;
+
     let aborted = false;
     const fetchPool = async () => {
-      if (!tx.poolAddress || !tx.amount) return;
+      console.log("[Desyn] pool_net_value_ts_seq fetch pool info...");
       try {
         const res = await fetch(
           `https://api.desyn.io/core/etf/pool_net_value_ts_seq/${tx.poolAddress}?period=DAY`
@@ -181,68 +183,39 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
         const json = (await res.json()) as PoolNetValueTsResponse;
         const latest_data = json?.data?.latest;
         if (!latest_data) return;
-        // latest_data is like
-        /* 
-        {
-  "pool": "0x9368c6A5a3bf6945C2567C524C4461adD26268DA",
-  "period": "HOUR",
-  "ts_in_seconds": 1758649320,
-  "net_value": 3502180.587530172,
-  "net_value_per_share": 0.010005010004884485,
-  "total_shares": 350042687.1957543,
-  "net_value_change_ratio_by_period": -0.0001998600979315,
-  "tvl_rate": -0.0001998600979314,
-  "tokens": [
-    {
-      "token": {
-        "address": "0x900101d06A7426441Ae63e9AB3B9b0F63Be145F1",
-        "decimals": 6,
-        "name": "Tether USD",
-        "symbol": "USDT"
-      },
-      "token_allocation_ratio": 1,
-      "token_balance": 3500430.372344,
-      "token_net_value": 3502180.587530172,
-      "token_price": 1.0005,
-      "token_price_change_ratio_by_period": -0.000199860097931426
-    }
-  ]
-}
-  */
-        const firstToken = latest_data.tokens?.[0]?.token as
-          | {
-              address: `0x${string}`;
-              decimals: number;
-              name: string;
-              symbol: string;
-            }
-          | undefined;
+
+        const firstToken = latest_data.tokens?.[0]?.token;
         if (firstToken?.address) setTokenAddress(firstToken.address as Address);
         if (typeof firstToken?.decimals === "number")
           setTokenDecimals(firstToken.decimals);
         if (firstToken?.symbol) setTokenSymbol(firstToken.symbol);
         if (firstToken?.name) setTokenName(firstToken.name);
-        // minPoolAmountOut = issueAmount(human) / netValuePerShare
+
         const amtNumber = Number(tx.amount);
         if (!(amtNumber > 0)) return;
-        const outHuman = amtNumber / Number(latest_data.net_value_per_share);
-        // Pool share tokens appear to have 18 decimals typically; use 18 unless API indicates otherwise
-        console.log("outHuman", outHuman);
+        let outHuman = amtNumber / Number(latest_data.net_value_per_share);
+        // fix outhuman to 6 decimal places
         const outWei = parseUnits(String(outHuman), 18);
         const outWeiWithSlippage = (outWei * 995n) / 1000n;
-        console.log("outWeiWithSlippage", outWeiWithSlippage);
-        setOutWeiHuman(outHuman);
+        outHuman = Number(outHuman.toFixed(6));
 
         if (!aborted) {
+          setOutWeiHuman(outHuman);
           setMinOut(outWeiWithSlippage);
         }
       } catch (e) {
         console.error("Failed to fetch DeSyn pool data", e);
       }
     };
-    void fetchPool();
+
+    // run once immediately
+    fetchPool();
+    // set interval
+    const id = setInterval(fetchPool, 30000);
+
     return () => {
       aborted = true;
+      clearInterval(id);
     };
   }, [tx.poolAddress, tx.amount]);
 
@@ -250,113 +223,12 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
   useEffect(() => {
     if (!tx.poolAddress) return;
     const fetchPool = async () => {
+      console.log("[Desyn] pool/get?pool_id fetch pool info...");
       const res = await fetch(
         `https://api.desyn.io/core/api/v1/chaindata/pool/get?pool_id=${tx.poolAddress}`
       );
       const json = (await res.json()) as DesynPoolGetResponse;
-      /* json is like 
-      {
-  "err": {
-    "code": 0,
-    "msg": "Success",
-    "msgDebug": ""
-  },
-  "data": {
-    "pool": {
-      "id": "0x9368c6A5a3bf6945C2567C524C4461adD26268DA",
-      "name": "USDT Basis Trading Fund",
-      "symbol": "USDBX",
-      "controller": "0x4d22c0D3459CC20e6726E567Fae000792DBe7Df2",
-      "crpController": "0xE1e91bE218232d479972e59Aa438a2BDa5c43425",
-      "upperCap": "115792089237316195423570985008687907853269984665640564039457584007913129639935",
-      "floorCap": "0",
-      "swapFee": "0.000001",
-      "crp": true,
-      "managerFee": "0",
-      "totalWeight": "25",
-      "totalSwapVolume": "0",
-      "totalSwapFee": "0",
-      "totalShares": "350042697.19574429676366531",
-      "createTime": 1731582718,
-      "joinsCount": 0,
-      "exitsCount": 0,
-      "liquidity": "0",
-      "swapsCount": 0,
-      "holdersCount": 0,
-      "etype": "0",
-      "issueFee": "0",
-      "redeemFee": "0",
-      "perfermanceFee": "300000000000000000",
-      "tx": "0x077cce36452f219a5f664b10fc1a7324e02085f6baafefa7247e47096acd4419",
-      "tokensList": [
-        "0x900101d06A7426441Ae63e9AB3B9b0F63Be145F1"
-      ],
-      "tokenWhiteLists": [
-        {
-          "id": "0x9368c6A5a3bf6945C2567C524C4461adD26268DA-0x900101d06A7426441Ae63e9AB3B9b0F63Be145F1",
-          "token": "0x900101d06A7426441Ae63e9AB3B9b0F63Be145F1",
-          "sort": "0",
-          "spender": "0x4d22c0D3459CC20e6726E567Fae000792DBe7Df2",
-          "caller": "0x7F7E7937010d98f8A09C3D7D63200Ab20c507B16"
-        }
-      ],
-      "investorLists": [],
-      "tokens": [
-        {
-          "id": "0x9368c6A5a3bf6945C2567C524C4461adD26268DA-0x900101d06A7426441Ae63e9AB3B9b0F63Be145F1",
-          "address": "0x900101d06A7426441Ae63e9AB3B9b0F63Be145F1",
-          "balance": "3500430.472344",
-          "decimals": 6,
-          "symbol": "USDT",
-          "denormWeight": "25",
-          "price": "1.0004",
-          "netValue": "3501830.644533",
-          "netValueRatio": "100",
-          "latestRebalancedInfo": null
-        }
-      ],
-      "swaps": [],
-      "rights": [
-        "canTokenWhiteLists"
-      ],
-      "collectEndTime": "0",
-      "closureEndTime": "0",
-      "isExistDTBT": false,
-      "fundImage": "https://api.desyn.io/file/pic/0024d1d5a65a62181c5b6bc096b3507e.png",
-      "collectInfo": {
-        "fundRaisingTokenMax": "",
-        "fundRaisingTokenMin": "",
-        "fundRaisingRemaining": "",
-        "fundRaisingRatio": "",
-        "fundRaisedToken": ""
-      },
-      "createdWalletAddr": "0x7F7E7937010d98f8A09C3D7D63200Ab20c507B16",
-      "isCompletedCollect": false,
-      "netValuePerShare": "0.010004",
-      "totalNetValue": "3501830.644533",
-      "etfTypes": [1, 4],
-      "etfStatus": 3,
-      "can_active4626": 0,
-      "canSubscribe": true,
-      "canRedeem": true,
-      "isProxyVersion": false,
-      "canGeneralSubscribe": false,
-      "canSmartSubscribe": true,
-      "IsOpenSTBT": false,
-      "erc4626Vault": {
-        "address": "",
-        "symbol": "",
-        "name": ""
-      },
-      "erc4626Asset": "",
-      "redeem_day": 0,
-      "points_type": 3,
-      "profit_symbol": "USDT",
-      "reward_en": "1 x DeSyn Points,7x Core Points"
-    }
-  }
-} 
-*/
+
       const ctrl = json?.data?.pool?.controller as `0x${string}` | undefined;
       const token0 = json?.data?.pool?.tokensList?.[0] as
         | `0x${string}`
@@ -384,6 +256,12 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
       }
     };
     void fetchPool();
+
+    const id = setInterval(fetchPool, 30000);
+
+    return () => {
+      clearInterval(id);
+    };
   }, [tx.poolAddress]);
 
   const parsedIssueAmount = useMemo(() => {
@@ -648,24 +526,20 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
         <h2 className="text-xl font-semibold mb-4">DeSyn Issue Token</h2>
 
         <div className="text-sm grid grid-cols-2 gap-y-2 mb-4">
-          <span className="text-gray-400">Pool</span>
-          <span className="text-right break-all">
-            {poolName ?? tx.poolAddress}
-          </span>
-          <span className="text-gray-400">Handle Token</span>
-          <span className="text-right break-all">
-            {tokenName ?? tokenAddress}
-          </span>
+          <span className="text-gray-400">Strategy</span>
+          <span className="text-right break-all">{poolName ?? "..."}</span>
+          <span className="text-gray-400">Pay Token</span>
+          <span className="text-right break-all">{tokenName ?? "..."}</span>
           <span className="text-gray-400">Amount</span>
           <span className="text-right">
             {tx.amount} {tokenSymbol ?? ""}
           </span>
-          <span className="text-gray-400">Estimated Shares Out</span>
+          {/* <span className="text-gray-400">Estimated Shares Out</span>
           <span className="text-right">
             {outWeiHuman !== undefined
               ? `${outWeiHuman} ${poolShareSymbol ?? ""}`
               : "..."}
-          </span>
+          </span> */}
           {/* rewards */}
           <span className="text-gray-400">Rewards</span>
           <span className="text-right">{rewards}</span>
