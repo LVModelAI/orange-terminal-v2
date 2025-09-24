@@ -51,6 +51,8 @@ import PellUnstakeErc20, {
 } from "@/components/pell/pell-unstake-erc20";
 import PellWithdrawErc20 from "@/components/pell/pell-withdraw-erc20";
 import { PellWithdrawErc20TxProps } from "@/lib/ai/tools/pell-restaking-actions/pellWithdrawErc20";
+import IssueTokenDesyn from "@/components/desyn/issue-token";
+import { DesynIssueTokenTxProps } from "@/lib/ai/tools/desyn/desynIssueToken";
 
 // Type narrowing is handled by TypeScript's control flow analysis
 // The AI SDK provides proper discriminated unions for tool calls
@@ -808,6 +810,29 @@ const PurePreviewMessage = ({
                         isFinished
                       />
                     </div>
+                  );
+                }
+              }
+
+              if (type === "tool-desynIssueToken") {
+                const { toolCallId, state } = part;
+                if (state === "input-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader loadingMessage="Preparing DeSyn issue UI..." />
+                    </div>
+                  );
+                }
+
+                if (state === "output-available") {
+                  const { output } = part;
+                  const tx = output as DesynIssueTokenTxProps;
+                  return (
+                    <IssueTokenDesyn
+                      tx={tx}
+                      key={toolCallId}
+                      sendMessage={sendMessage}
+                    />
                   );
                 }
               }

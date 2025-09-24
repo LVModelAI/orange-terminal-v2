@@ -768,6 +768,23 @@ After the confirmatin, fetch the portfolio again.
 Remember, this will only show ui to the user, the user will have to click the button to actually begin the transaciton.
 `;
 
+// desyn
+export const desynIssueTokenPrompt = `
+Use desynIssueToken to show the UI for issuing a token into a DeSyn pool (Core chain ${CHAIN_ID}).
+
+Pre-steps:
+- First call getDefiProtocolsStats to discover DeSyn pools and pick the target pool address.
+- Confirm with the user the pool name and the human-readable amount to issue.
+
+Inputs for desynIssueToken:
+- poolAddress: the DeSyn pool address discovered from getDefiProtocolsStats.
+- amount: human-readable amount of the handle token to issue (e.g., "100").
+
+Notes:
+- The UI will fetch pool data (net_value_per_share), compute minPoolAmountOut with a 1% safety buffer, and call the DeSyn router when the user clicks the button.
+- Never auto-execute on-chain actions; always wait for user confirmation.
+`;
+
 // pell
 export const pellStakeErc20Prompt = `
 Use pellStakeErc20 only when the user explicitly wants to stake an ERC20 into a Pell strategy.
@@ -945,5 +962,5 @@ export const systemPrompt = ({
 }: {
   selectedChatModel: string;
 }) => {
-  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}\n\n${pellWithdrawErc20Prompt}\n\n${pellGetAllStrategiesPrompt}`;
+  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}\n\n${pellWithdrawErc20Prompt}\n\n${pellGetAllStrategiesPrompt}\n\n${desynIssueTokenPrompt}`;
 };

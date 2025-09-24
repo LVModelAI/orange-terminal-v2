@@ -86,6 +86,9 @@ type DesynPoolRaw = {
   strategy_token_label: string;
   risk_label: string;
   [key: string]: any;
+  pay_token: string[];
+  reward_en: boolean[];
+  reward_coin: string[];
 };
 
 type DesynPoolSummary = {
@@ -99,6 +102,9 @@ type DesynPoolSummary = {
   invest_label: string;
   strategy_token_label: string;
   risk_label: string;
+  pay_token: string[];
+  reward_en: boolean[];
+  reward_coin: string[];
 };
 
 type PellPoolRaw = {
@@ -217,6 +223,9 @@ const summarizeDesyn = (raw: DesynPoolRaw[]): DesynPoolSummary[] =>
     invest_label: p.invest_label,
     strategy_token_label: p.strategy_token_label,
     risk_label: p.risk_label,
+    pay_token: p.pay_token,
+    reward_en: p.reward_en,
+    reward_coin: p.reward_coin,
   }));
 
 const summarizePell = (raw: PellPoolRaw[]): PellPoolSummary[] => {
