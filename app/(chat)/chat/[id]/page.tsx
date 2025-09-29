@@ -11,7 +11,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
   const { id } = params;
   const chat = await getChatById({ id });
-  console.log("chat", chat);
+  // console.log("chat", chat);
 
   if (!chat) {
     notFound();
@@ -37,7 +37,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     id,
   });
 
-  console.log("messagesFromDb", messagesFromDb);
+  messagesFromDb.map((message) => {
+    console.log("message", message);
+    (message.parts as any[]).map((part: any) => {
+      console.log("part", part);
+    });
+  });
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 
