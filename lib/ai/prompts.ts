@@ -394,27 +394,33 @@ Use this tool whenever the user asks about:
 
 // protocol information search
 export const getProtocolInformationPrompt = `
-Use getProtocolInformation to research a Core ecosystem protocol and summarize official information.
+Use getProtocolInformation whenever the user asks for information about a protocol supported by our platform.
 
 When to use:
-- The user asks about a specific protocol's features, rewards, risks, fees, or how it works
-- The user requests links or official docs/app pages for: core-dao, colend, desyn, pell-network, molten
-
+- The user requests details about a protocol's features, mechanics, rewards, fees, or risks
+- The user asks for explanations on how the protocol works
+- The user requests references to official sources (docs, app pages, blogs, etc.)
 
 Input:
-- protocol → one of: core-dao, colend, desyn, pell-network, molten
+- protocol → must be one of the supported protocols on our platform (e.g., core-dao, colend, desyn, pell-network, molten, etc.)
+- query → the user's query about the protocol
 
-Behavior:
-- Performs focused web search restricted to official domains and common subdomains (www, app, docs, blog)
-- Lightly scrapes key pages for concise text
-- Returns combined results: searches (ranked links with snippets) and scrapes (title + text)
+this tool does the following:
+- Performs a targeted web search restricted to official domains and trusted subdomains (e.g., www, app, docs, blog)
+- Collects authoritative text from key pages (protocol overview, FAQs, docs, governance, reward/fee breakdowns)
+- Returns combined structured results:
+  1. Searches → ranked list of relevant pages with snippet text
+  2. Scrapes → page title and summarized key content
 
 Response guidance:
-- Prefer official docs and app domains first
-- Provide detailed answer to the user query (what it is, how it works, primary actions, risks/fees if available).
-- do no provide any links to the user, as we want to keep the user on our website.
-you can provide further suggestive pills to the user to click to get more information.
-- If APY/TVL is requested, cite from docs or defer to getDefiProtocolsStats for live data
+- Always prioritize official documentation, apps, and blogs over secondary sources
+- Provide the user with a clear, detailed explanation of the protocol (what it is, how it works, its key actions/features, risks, and fees)
+- Never provide direct links — instead, summarize content so the user stays on our platform
+- If APY/TVL or other live stats are requested:
+  - first use getDefiProtocolsStats to get the live stats
+  - then use the stats to answer the user's query
+- End by suggesting additional pills or options the user can click for further exploration
+do not provide any links to the user, as we want to keep the user on our website.
 `;
 
 // core dao staking

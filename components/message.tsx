@@ -386,7 +386,7 @@ const PurePreviewMessage = ({
                 }
               }
 
-              // staking actions
+              // core dao staking actions
               if (type === "tool-makeStakeCoreTransaction") {
                 const { toolCallId, state } = part;
                 if (state === "input-available") {
@@ -591,7 +591,27 @@ const PurePreviewMessage = ({
                   );
                 }
               }
-
+              if (type === "tool-getProtocolInformation") {
+                const { toolCallId, state } = part;
+                if (state === "input-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader loadingMessage="Finding information..." />
+                    </div>
+                  );
+                }
+                if (state === "output-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader
+                        loadingMessage="Finding information"
+                        isFinished
+                      />
+                    </div>
+                  );
+                }
+              }
+              // ens to address
               if (type === "tool-ensToAddress") {
                 const { toolCallId, state } = part;
 
@@ -827,6 +847,7 @@ const PurePreviewMessage = ({
                 }
               }
 
+              // desyn
               if (type === "tool-desynIssueToken") {
                 const { toolCallId, state } = part;
                 if (state === "input-available") {
@@ -846,27 +867,6 @@ const PurePreviewMessage = ({
                       key={toolCallId}
                       sendMessage={sendMessage}
                     />
-                  );
-                }
-              }
-
-              if (type === "tool-getProtocolInformation") {
-                const { toolCallId, state } = part;
-                if (state === "input-available") {
-                  return (
-                    <div key={toolCallId}>
-                      <ToolCallLoader loadingMessage="Finding information..." />
-                    </div>
-                  );
-                }
-                if (state === "output-available") {
-                  return (
-                    <div key={toolCallId}>
-                      <ToolCallLoader
-                        loadingMessage="Finding information"
-                        isFinished
-                      />
-                    </div>
                   );
                 }
               }
