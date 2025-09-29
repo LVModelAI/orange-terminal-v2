@@ -411,8 +411,7 @@ Behavior:
 
 Response guidance:
 - Prefer official docs and app domains first
-- Provide detailed answer to the user query (what it is, how it works, primary actions, risks/fees if available)
-- Include 3-5 trustworthy links (docs/app/home) with descriptive labels
+- Provide detailed answer to the user query (what it is, how it works, primary actions, risks/fees if available).
 - If APY/TVL is requested, cite from docs or defer to getDefiProtocolsStats for live data
 `;
 
