@@ -296,25 +296,27 @@ export const getPortfolio = tool({
     const nfts = pick(nftsR, [], "nfts");
     const tokensData = pick(tokensR, { tokens: [] }, "tokens");
 
-    const tokens = (tokensData?.tokens ?? []).map((t: any) => {
-      const amount = toUnits(t.balance ?? "0", t.decimals ?? 18);
-      const price = t.price ?? 0;
-      const usdValue =
-        typeof t.usd_value === "number" ? t.usd_value : amount * price;
-      const change24hPercent =
-        typeof t.price_24h_change === "number" ? t.price_24h_change * 100 : 0;
+    const tokens = (tokensData?.tokens ?? [])
+      .map((t: any) => {
+        const amount = toUnits(t.balance ?? "0", t.decimals ?? 18);
+        const price = t.price ?? 0;
+        const usdValue =
+          typeof t.usd_value === "number" ? t.usd_value : amount * price;
+        const change24hPercent =
+          typeof t.price_24h_change === "number" ? t.price_24h_change * 100 : 0;
 
-      return {
-        token_address: t.token_address,
-        logo: t.logo_url ?? null,
-        name: t.name,
-        symbol: t.symbol,
-        price,
-        amount,
-        usdValue,
-        change24hPercent,
-      };
-    });
+        return {
+          token_address: t.token_address,
+          logo: t.logo_url ?? null,
+          name: t.name,
+          symbol: t.symbol,
+          price,
+          amount,
+          usdValue,
+          change24hPercent,
+        };
+      })
+      .filter((t: any) => t.usdValue >= 0.01); // ✅ Only keep tokens worth >= $0.01
 
     let pellRestakingPortfolio = [];
 
