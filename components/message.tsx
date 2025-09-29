@@ -225,6 +225,17 @@ const PurePreviewMessage = ({
                     </div>
                   );
                 }
+                if (state === "output-available") {
+                  const { output } = part;
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader
+                        loadingMessage="Wallet info fetched"
+                        isFinished
+                      />
+                    </div>
+                  );
+                }
               }
 
               if (type === "tool-makeSendTransaction") {
