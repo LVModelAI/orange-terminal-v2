@@ -37,12 +37,12 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
     id,
   });
 
-  messagesFromDb.map((message) => {
-    console.log("message", message);
-    (message.parts as any[]).map((part: any) => {
-      console.log("part", part);
-    });
-  });
+  // messagesFromDb.map((message) => {
+  //   console.log("message", message);
+  //   (message.parts as any[]).map((part: any) => {
+  //     console.log("part", part);
+  //   });
+  // });
 
   const uiMessages = convertToUIMessages(messagesFromDb);
 

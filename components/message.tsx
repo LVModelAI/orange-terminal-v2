@@ -847,6 +847,27 @@ const PurePreviewMessage = ({
                   );
                 }
               }
+
+              if (type === "tool-getProtocolInformation") {
+                const { toolCallId, state } = part;
+                if (state === "input-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader loadingMessage="Getting protocol information..." />
+                    </div>
+                  );
+                }
+                if (state === "output-available") {
+                  return (
+                    <div key={toolCallId}>
+                      <ToolCallLoader
+                        loadingMessage="Protocol information fetched"
+                        isFinished
+                      />
+                    </div>
+                  );
+                }
+              }
             })}
 
             {!isReadonly && (

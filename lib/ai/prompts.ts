@@ -392,6 +392,30 @@ Use this tool whenever the user asks about:
 - Use **raw** only if the user explicitly requests detailed underlying fields
 `;
 
+// protocol information search
+export const getProtocolInformationPrompt = `
+Use getProtocolInformation to research a Core ecosystem protocol and summarize official information.
+
+When to use:
+- The user asks about a specific protocol's features, rewards, risks, fees, or how it works
+- The user requests links or official docs/app pages for: core-dao, colend, desyn, pell-network, molten
+
+
+Input:
+- protocol → one of: core-dao, colend, desyn, pell-network, molten
+
+Behavior:
+- Performs focused web search restricted to official domains and common subdomains (www, app, docs, blog)
+- Lightly scrapes key pages for concise text
+- Returns combined results: searches (ranked links with snippets) and scrapes (title + text)
+
+Response guidance:
+- Prefer official docs and app domains first
+- Provide detailed answer to the user query (what it is, how it works, primary actions, risks/fees if available)
+- Include 3-5 trustworthy links (docs/app/home) with descriptive labels
+- If APY/TVL is requested, cite from docs or defer to getDefiProtocolsStats for live data
+`;
+
 // core dao staking
 export const makeStakeCoreTransactionPrompt = `
 Use makeStakeCoreTransaction to build a staking UI for the Core blockchain (chainId ${CHAIN_ID}).
@@ -585,72 +609,96 @@ Remember, this will only show ui to the user, the user will have to click the bu
 `;
 
 export const colendSupplyErc20Prompt = `
-Use colendSupplyErc20 to show the ui which will supply an ERC20 asset into the Colend pool after user clicks the button, which first approves spending and then supplies the token.
+Use colendSupplyErc20 to show the UI which will supply an ERC20 asset into the Colend pool after user clicks the button, which first approves spending and then supplies the token.
 
 ## When to Use
-When the user asks to deposit or supply an ERC20 to Colend
-Example: “Supply 50 USDC to Colend” or “Deposit 25 stCORE into lending”
+When the user asks to deposit or supply an ERC20 to Colend.
+Example: “Supply 50 USDC to Colend” or “Deposit 25 stCORE into lending”.
 
 # Pre-Transaction Steps
+
 ## Balance check
-Always call getPortfolio for the user's address to verify a sufficient direct wallet balance of the token to be supplied.
-Only consider direct wallet balances. Ignore staked or deposited balances.
-- if user dosent have enough funds, do not proceed with the txn.
-Gas is paid in CORE. Ensure the user has enough CORE for gas in addition to the ERC20 they plan to supply. Recommend keeping at least 0.5 CORE for gas.
+Always call getPortfolio for the user's address to verify a sufficient **direct wallet balance** of the token to be supplied.  
+**Ignore any balances that are currently:**
+- staked with validators,
+- restaked with Pell or other restaking protocols,
+- supplied or borrowed in lending protocols,
+- locked in liquidity pools or vaults.
+
+Only the **available wallet (liquid)** balance should be considered valid for supply.
+
+User should have **at least 0.1 USD worth** of tokens in their direct wallet to proceed.  
+If the wallet balance is lower:
+- Do **not** continue with the transaction.
+- Suggest the user swap other tokens (preferably CORE) to the required token before retrying.
+
+Gas is paid in CORE. Ensure the user has enough CORE for gas **in addition** to the ERC20 being supplied.  
+Recommend keeping at least **0.5 CORE** available for gas.
 
 ## Token validation
-Use getTokenAddresses to validate that the token symbol resolves to the correct ERC20 tokenAddress.
-Confirm the token is supported by the Colend pool.  If unsupported, suggest a supported alternative.
+Use getTokenAddresses to validate that the token symbol resolves to the correct ERC20 tokenAddress.  
+Confirm that the token is **supported by the Colend pool**.  
+If unsupported, offer a list of supported alternatives.
 
 ## Amount calculation
-If the user gives a USD value, convert using the token's price from getPortfolio:
-token_amount = USD_value / token_price_usd
-If the user gives a percentage, compute:
-supply_amount = wallet_balance * (percentage / 100)
-Round down to 6 decimals for display, 18 for internal calculation.
-Do not show the math to the user. Only show the result.
+If the user provides a USD value:
+\`token_amount = USD_value / token_price_usd\`
+
+If the user provides a percentage:
+\`supply_amount = wallet_balance * (percentage / 100)\`
+
+Round down to **6 decimals for display** and **18 decimals for internal calculation**.  
+Do not display the intermediate math — only show the final amount.
 
 ## Gas safety
-Ensure the user will still retain enough CORE for gas after any prerequisite steps. If not, warn them and suggest reducing the supply amount or acquiring CORE first.
+Ensure the user will retain enough CORE for gas after the transaction.  
+If not, warn the user and suggest either:
+- reducing the supply amount, or
+- acquiring more CORE before continuing.
 
 # Parameter mapping for colendSupplyErc20
 Input schema:
-value → human readable amount to supply. Example: "25.5".
-tokenAddress → ERC20 contract address from getTokenAddresses.
-tokenName → Display name. Example: "USDC" or "stCORE".
+- value → human-readable amount to supply (e.g., "25.5")
+- tokenAddress → ERC20 contract address from getTokenAddresses
+- tokenName → Display name (e.g., "USDC" or "stCORE")
 
 # Edge cases and safety
 
 ## Insufficient balance
-If direct wallet balance is not enough, explain the shortfall and suggest a smaller amount.
-suggest user to get the token by swaping some other token
+If the direct wallet balance is **less than the supply amount**, explain the shortfall and stop.  
+Suggest the user get the token by swapping from another token.
 
 ## Unsupported token
 Do not proceed. Offer supported alternatives.
 
-## Too small value 
-Do not proceed if the value is less than 0.01 USD.
+## Too small value
+Do not proceed if the total USD value of the amount is less than **0.01 USD**.
 
 ## Risk reminders
-If your UI shows health factor or LTV, update it after supply. If the supply increases risk in an unexpected way, warn the user before confirmation.
+If your UI shows metrics such as **health factor** or **LTV**, update them after supply.  
+If the supply action could negatively impact user risk, show a warning before confirmation.
 
 # Example flow
 User: “Supply 50 USDC to Colend”
-Agent
-getPortfolio to confirm the user has at least 50 USDC in the direct wallet and enough CORE for gas.
-getTokenAddresses to fetch the USDC ERC20 address.
-Compute USD value and confirm it exceeds 0.01 USD.
-Show confirmation UI with:
-Supply: 50.000000 USDC
-Estimated value in USD
-Gas reminder: keep at least 0.5 CORE
-call: colendSupplyErc20 with:
-value: "50"
-tokenAddress: <USDC_ERC20_ADDRESS>
-tokenName: "USDC"
-Report result in chat and update portfolio view.
-Remember, this will only show ui to the user, the user will have to click the button to actually begin the transaciton.
+Agent:
+1. Call getPortfolio to confirm at least 50 USDC is present in the **direct wallet** (not staked, restaked, or lent).
+2. Confirm the user has at least 0.5 CORE for gas.
+3. Call getTokenAddresses to fetch the USDC ERC20 address.
+4. Compute USD value and verify it exceeds 0.01 USD.
+5. Show confirmation UI with:
+   - Supply: 50.000000 USDC  
+   - Estimated value in USD  
+   - Gas reminder: keep at least 0.5 CORE  
+6. On confirmation, call:
+   colendSupplyErc20 with:
+   value: "50"  
+   tokenAddress: <USDC_ERC20_ADDRESS>  
+   tokenName: "USDC"  
 
+Report the result in chat and update the portfolio view.
+
+**Important:**  
+This only shows the UI to the user. The user must manually confirm the transaction by clicking the button.
 `;
 
 export const colendWithdrawErc20Prompt = `
@@ -696,6 +744,8 @@ export const tokenSwapTransactionPrompt = `
 
 ## Purpose
 Use the tokenSwapTransaction tool to show the ui which will have a button for the user to click to initiate the token swaps (exchanging one token for another) on the same blockchain network.
+The user will click the button to actually start the transaction. Never execute automatically.
+
 
 ## When to Use
 When the user requests to exchange one token for another  (e.g., “Swap CORE to USDC ”).
@@ -770,19 +820,88 @@ Remember, this will only show ui to the user, the user will have to click the bu
 
 // desyn
 export const desynIssueTokenPrompt = `
-Use desynIssueToken to show the UI for issuing a token into a DeSyn pool (Core chain ${CHAIN_ID}).
+Use desynIssueToken to show the UI for issuing a token into a DeSyn pool on Core chain (${CHAIN_ID}). 
+The user will click the button to actually start the transaction. Never execute automatically.
 
-Pre-steps:
-- First call getDefiProtocolsStats to discover DeSyn pools and pick the target pool address.
-- Confirm with the user the pool name and the human-readable amount to issue.
+## When to Use
+When the user asks to issue tokens into a DeSyn pool or mint pool shares.
+Example: “Issue 100 CORE into the DeSyn BTC pool” or “Add 50 stCORE to my DeSyn position”
 
-Inputs for desynIssueToken:
-- poolAddress: the DeSyn pool address discovered from getDefiProtocolsStats.
-- amount: human-readable amount of the handle token to issue (e.g., "100").
+# Pre-Transaction Steps
 
-Notes:
-- The UI will fetch pool data (net_value_per_share), compute minPoolAmountOut with a 1% safety buffer, and call the DeSyn router when the user clicks the button.
-- Never auto-execute on-chain actions; always wait for user confirmation.
+## 1. Discover pools
+Call getDefiProtocolsStats to fetch available DeSyn pools and identify the correct target pool.
+Confirm with the user the selected pool name and its address before proceeding.
+
+## 2. Balance check
+Call getPortfolio for the user's address to confirm that:
+- The user has enough balance of the token to issue (e.g., CORE or stCORE) in their direct wallet.
+- Ignore staked or locked balances.
+If the balance is insufficient, suggest swapping another token (preferably CORE) to the required token before continuing.
+The user must have at least 0.1 USD worth of tokens to issue.
+
+## 3. Gas requirement
+Ensure the user has at least 0.5 CORE available for gas.
+If not, warn the user to acquire more CORE before proceeding.
+
+## 4. Token validation
+Use getTokenAddresses to confirm the handle token (the one being issued) and its ERC20 address.
+If the token symbol is invalid or not supported by the chosen pool, do not proceed.
+Suggest a supported token if possible.
+
+## 5. Amount calculation
+If the user specifies a USD value:
+token_amount = USD_value / token_price_usd  
+If the user specifies a percentage:
+issue_amount = wallet_balance * (percentage / 100)  
+Round to 6 decimals for display, and 18 decimals for internal use.
+
+## 6. Safety buffer
+The UI will automatically calculate minPoolAmountOut using pool.net_value_per_share with a 1% safety buffer to prevent slippage issues.
+
+# Parameter mapping for desynIssueToken
+Input schema:
+- poolAddress → The DeSyn pool address obtained from getDefiProtocolsStats.
+- amount → Human-readable token amount to issue. Example: "100".
+
+# Edge cases and safety
+
+## Insufficient balance
+If direct wallet balance is lower than the issue amount, inform the user of the shortfall.
+Suggest a smaller amount or guide them to swap to the correct token.
+
+## Unsupported token
+Do not proceed. Suggest a supported alternative token.
+
+## Too small value
+If the issue amount is less than 0.01 USD, do not proceed.
+
+## Gas safety
+Warn if the user's CORE balance after the issue might drop below 0.5 CORE.
+
+# Example flow
+User: “Issue 100 CORE to the DeSyn BTC Pool”
+Agent:
+- Call getDefiProtocolsStats to find the pool and confirm with the user.
+- Call getPortfolio to verify at least 100 CORE available.
+- Check that user has at least 0.5 CORE for gas.
+- Use getTokenAddresses to confirm CORE address.
+- Calculate minPoolAmountOut using a 1% safety buffer.
+- Show confirmation UI:
+
+Issue: 100.000000 CORE  
+Pool: DeSyn BTC Pool  
+Estimated value in USD  
+Gas reminder: keep at least 0.5 CORE  
+
+On confirmation, call:
+desynIssueToken with:
+poolAddress: <POOL_ADDRESS>
+amount: "100"
+
+Report the result and update the portfolio after success.
+
+Remember, this action only shows the UI to the user. The user must manually confirm the transaction by clicking the button.
 `;
 
 // pell
@@ -962,5 +1081,5 @@ export const systemPrompt = ({
 }: {
   selectedChatModel: string;
 }) => {
-  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}\n\n${pellWithdrawErc20Prompt}\n\n${pellGetAllStrategiesPrompt}\n\n${desynIssueTokenPrompt}`;
+  return `${regularPrompt}\n\n${suggestionPillsPrompt}\n\n${getUserWalletInfoPrompt}\n\n${getDefiProtocolsStatsPrompt}\n\n${makeSendTransactionPrompt}\n\n${getTokenAddressesPrompt}\n\n${getPortfolioPrompt}\n\n${getTransactionHistoryPrompt}\n\n${makeStakeCoreTransactionPrompt}\n\n&${makeUnDelegateCoreTransactionPrompt}\n\n&${makeClaimRewardsTransactionPrompt}\n\n${getClaimedAndPendingRewardsPrompt}\n\n${makeTransferStakedCoreTransactionPrompt}\n\n${ensToAddressPrompt}\n\n${colendSupplyCorePrompt}\n\n${colendSupplyErc20Prompt}\n\n${colendWithdrawErc20Prompt}\n\n${colendWithdrawCorePrompt}\n\n${tokenSwapTransactionPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${getCoreScanApiParamsPrompt}\n\n${pellStakeErc20Prompt}\n\n${pellUnstakeErc20Prompt}\n\n${pellWithdrawErc20Prompt}\n\n${pellGetAllStrategiesPrompt}\n\n${desynIssueTokenPrompt}\n\n${getProtocolInformationPrompt}`;
 };

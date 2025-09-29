@@ -75,6 +75,7 @@ import { pellWithdrawErc20 } from "@/lib/ai/tools/pell-restaking-actions/pellWit
 import { getPellStrategies } from "@/lib/ai/tools/pell-restaking-actions/getPellStrategies";
 // desyn
 import { desynIssueToken } from "@/lib/ai/tools/desyn/desynIssueToken";
+import { getProtocolInformation } from "@/lib/ai/tools/getProtocolInformation";
 
 //swaps
 import { tokenSwapTransaction } from "@/lib/ai/tools/swap-actions/tokenSwapTransaction";
@@ -195,6 +196,7 @@ export async function POST(request: Request) {
               ? []
               : [
                   "getDefiProtocolsStats",
+                  "getProtocolInformation",
                   "makeSendTransaction",
                   "makeStakeCoreTransaction",
                   "getDelegatedCoreForEachValidator",
@@ -224,6 +226,7 @@ export async function POST(request: Request) {
           experimental_transform: smoothStream({ chunking: "word" }),
           tools: {
             getDefiProtocolsStats,
+            getProtocolInformation,
             makeSendTransaction,
             makeStakeCoreTransaction,
             getDelegatedCoreForEachValidator,
