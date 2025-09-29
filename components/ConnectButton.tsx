@@ -20,7 +20,7 @@ export const ConnectButton = () => {
         alt="Core"
         width={50}
         height={50}
-        className="w-8 h-8 "
+        className="w-8 h-8 hidden md:block "
       />
       <appkit-button size="sm" balance={"hide"} />
     </div>
