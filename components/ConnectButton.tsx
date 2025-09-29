@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 
 export const ConnectButton = () => {
@@ -13,8 +14,15 @@ export const ConnectButton = () => {
   }, []);
 
   return (
-    <div className="border border-theme-orange rounded-full">
-      <appkit-button size="sm" balance={isMobile ? "hide" : "show"} />
+    <div className="border border-theme-orange rounded-full flex flex-row items-center pl-2">
+      <Image
+        src="/images/core.png"
+        alt="Core"
+        width={50}
+        height={50}
+        className="w-8 h-8 "
+      />
+      <appkit-button size="sm" balance={"hide"} />
     </div>
   );
 };
