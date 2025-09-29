@@ -27,7 +27,7 @@ export const getTokenAddresses = tool({
       { name: "dualCORE", address: DUALCORE_TOKEN_ADDRESS },
     ];
 
-    console.log("Returning Core token address list:", tokenAddressList);
+    // console.log("Returning Core token address list:", tokenAddressList);
     return tokenAddressList;
   },
 });
