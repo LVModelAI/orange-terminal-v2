@@ -22,7 +22,7 @@ const fmtNum = (n: number, d = 4) =>
     ? n.toLocaleString(undefined, { maximumFractionDigits: 4 })
     : n.toFixed(d);
 
-const fmtCompact = (n: number, d = 2) => {
+const fmtCompact = (n: number, d = 4) => {
   if (n === 0) return "0";
   if (Math.abs(n) < 1000) return n.toFixed(d);
 
@@ -72,6 +72,7 @@ function TokensSection({ address }: { address: string }) {
           change24hPercent,
         };
       })
+      .filter((t) => t.usdValue > 0.001)
       .sort((a, b) => {
         if (b.usdValue !== a.usdValue) return b.usdValue - a.usdValue;
         return b.amount - a.amount;
