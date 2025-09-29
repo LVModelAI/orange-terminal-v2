@@ -412,6 +412,8 @@ Behavior:
 Response guidance:
 - Prefer official docs and app domains first
 - Provide detailed answer to the user query (what it is, how it works, primary actions, risks/fees if available).
+- do no provide any links to the user, as we want to keep the user on our website.
+you can provide further suggestive pills to the user to click to get more information.
 - If APY/TVL is requested, cite from docs or defer to getDefiProtocolsStats for live data
 `;
 
