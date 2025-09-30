@@ -328,7 +328,7 @@ export const getDefiProtocolsStats = tool({
         const json = await res.json();
         desynRaw = json?.data?.items || [];
         desynSummary = summarizeDesyn(desynRaw);
-        console.log("desynSummary---- ", desynSummary);
+        // console.log("desynSummary---- ", desynSummary);
       }
     } catch (err) {
       console.error("Error fetching DeSyn stats:", err);

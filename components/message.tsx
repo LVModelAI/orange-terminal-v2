@@ -405,7 +405,10 @@ const PurePreviewMessage = ({
                     humanReadableValue,
                     valueInWei,
                     chainId,
+                    error,
                   } = output as StakeComponentProps;
+                  // console.log("error---- ", error);
+                  if (error) return null;
                   return (
                     <StakeComponent
                       candidateAddress={candidateAddress}
