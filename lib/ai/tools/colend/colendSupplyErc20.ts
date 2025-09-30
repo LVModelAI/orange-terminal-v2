@@ -66,12 +66,7 @@ export const colendSupplyErc20 = tool({
     });
 
     // --- Step 1: Check token balance using helper ---
-    const result = await checkTokenBalance(
-      walletAddress,
-      tokenAddress,
-      tokenName,
-      value
-    );
+    const result = await checkTokenBalance(walletAddress, tokenAddress, value);
 
     // --- Step 2: Handle insufficient balance or missing token ---
     if (!result.ok) {

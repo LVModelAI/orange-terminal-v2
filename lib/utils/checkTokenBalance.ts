@@ -9,14 +9,12 @@ export type TokenCheckResult = {
 export async function checkTokenBalance(
   walletAddress: string,
   tokenAddress: string,
-  tokenName: string,
   requestedValue: string
 ): Promise<TokenCheckResult> {
   try {
     console.log("checkTokenBalance: checking balance for token", {
       walletAddress,
       tokenAddress,
-      tokenName,
       requestedValue,
     });
     // 1. Fetch portfolio tokens
@@ -43,12 +41,12 @@ export async function checkTokenBalance(
     );
 
     if (!tokenData) {
-      console.error("No balance found for token", tokenName, tokenAddress);
+      console.error("No balance found for token", tokenAddress);
       return {
         ok: false,
         balanceHuman: 0,
         requested: Number(requestedValue),
-        error: `No balance found for token ${tokenName} (${tokenAddress}).`,
+        error: `No balance found for token (${tokenAddress}).`,
       };
     }
 
@@ -61,12 +59,12 @@ export async function checkTokenBalance(
 
     // 4. Compare
     if (balanceHuman < requested) {
-      console.error("Insufficient balance for token", tokenName, tokenAddress);
+      console.error("Insufficient balance for token", tokenAddress);
       return {
         ok: false,
         balanceHuman,
         requested,
-        error: `Insufficient balance: user has ${balanceHuman} ${tokenName}, but tried to supply ${requested}.`,
+        error: `Insufficient balance: user has ${balanceHuman}, but tried to supply ${requested}.`,
       };
     }
 

@@ -47,7 +47,6 @@ export const colendSupplyCore = tool({
     const result = await checkTokenBalance(
       walletAddress,
       "core", // special case for native CORE
-      "CORE",
       value
     );
 

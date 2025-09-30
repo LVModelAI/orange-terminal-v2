@@ -45,12 +45,7 @@ export const makeStakeCoreTransaction = tool({
     });
 
     // --- Step 1: Balance check ---
-    const result = await checkTokenBalance(
-      walletAddress,
-      "core",
-      "CORE",
-      value
-    );
+    const result = await checkTokenBalance(walletAddress, "core", value);
 
     // --- Step 2: Handle insufficient or missing balance ---
     if (!result.ok) {
