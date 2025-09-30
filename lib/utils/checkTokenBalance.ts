@@ -59,7 +59,7 @@ export async function checkTokenBalance(
 
     // 4. Compare
     if (balanceHuman < requested) {
-      console.error("Insufficient balance for token", tokenAddress);
+      console.error("!!!!!! Insufficient balance for token", tokenAddress);
       return {
         ok: false,
         balanceHuman,

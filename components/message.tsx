@@ -749,6 +749,7 @@ const PurePreviewMessage = ({
                 if (state === "output-available") {
                   const { output } = part;
                   const tx = output as TokenSwapProps;
+                  if (tx.error) return null;
                   return (
                     <TokenSwap
                       key={toolCallId}
