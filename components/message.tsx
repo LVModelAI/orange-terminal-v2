@@ -351,7 +351,7 @@ const PurePreviewMessage = ({
 
                 if (state === "output-available") {
                   const { output } = part;
-                  // console.log("get portfolio output --- ", output);
+                  console.log("get portfolio output --- ", output);
                   return (
                     <div key={toolCallId}>
                       <ToolCallLoader

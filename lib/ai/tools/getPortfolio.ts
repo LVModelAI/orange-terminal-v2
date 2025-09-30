@@ -279,17 +279,22 @@ export const getPortfolio = tool({
       staking: `${baseUrl}/api/portfolio/staking?address=${walletAddress}`,
       nfts: `${baseUrl}/api/portfolio/nfts?address=${walletAddress}`,
       tokens: `${baseUrl}/api/portfolio/tokens?address=${walletAddress}`,
-      pellRestakingPortfolio: `${baseUrl}/api/portfolio/pell-restaking-portfolio?address=${walletAddress}`,
+      // pellRestakingPortfolio: `${baseUrl}/api/portfolio/pell-restaking-portfolio?address=${walletAddress}`,
     };
 
-    const [protocolsR, stakingR, nftsR, tokensR, pellRestakingPortfolioR] =
-      await Promise.allSettled([
-        getJson(endpoints.protocols),
-        getJson(endpoints.staking),
-        getJson(endpoints.nfts),
-        getJson(endpoints.tokens),
-        getJson(endpoints.pellRestakingPortfolio),
-      ]);
+    const [
+      protocolsR,
+      stakingR,
+      nftsR,
+      tokensR,
+      // pellRestakingPortfolioR
+    ] = await Promise.allSettled([
+      getJson(endpoints.protocols),
+      getJson(endpoints.staking),
+      getJson(endpoints.nfts),
+      getJson(endpoints.tokens),
+      // getJson(endpoints.pellRestakingPortfolio),
+    ]);
 
     const protocols = pick(protocolsR, [], "protocols");
     const staking = pick(stakingR, [], "staking");
@@ -318,18 +323,24 @@ export const getPortfolio = tool({
       })
       .filter((t: any) => t.usdValue >= 0.01); // ✅ Only keep tokens worth >= $0.01
 
-    let pellRestakingPortfolio = [];
+    // let pellRestakingPortfolio = [];
 
-    // remove stakeIcon logo from pellRestakingPortfolio
-    try {
-      pellRestakingPortfolio = pick(
-        pellRestakingPortfolioR,
-        [],
-        "pellRestakingPortfolio"
-      ).tokens.map(({ stakeIcon, ...rest }: PellToken) => rest);
-    } catch (error) {
-      console.log("error --- ", error);
-    }
+    // // remove stakeIcon logo from pellRestakingPortfolio
+    // try {
+    //   pellRestakingPortfolio = pick(
+    //     pellRestakingPortfolioR,
+    //     [],
+    //     "pellRestakingPortfolio"
+    //   ).tokens.map(({ stakeIcon, ...rest }: PellToken) => rest);
+    // } catch (error) {
+    //   console.log("error --- ", error);
+    // }
+
+    // add note to protocols that the tokens in protocols are not available to use for other transactions as the tokens are locked in the protocols. only use tokens in the tokens array for transactions.
+    protocols.complex = protocols.complex.map((protocol: any) => ({
+      ...protocol,
+      note: "The tokens in this protocol are not available to use for other transactions as the tokens are locked in the protocol. only use tokens in the tokens array for transactions. ",
+    }));
 
     // console.log("protocols --- ", protocols);
     // console.log("staking --- ", staking);
@@ -342,7 +353,7 @@ export const getPortfolio = tool({
       staking,
       nfts,
       tokens,
-      pellRestakingPortfolio,
+      // pellRestakingPortfolio,
     };
   },
 });
