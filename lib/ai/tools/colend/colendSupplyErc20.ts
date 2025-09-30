@@ -4,6 +4,7 @@ import { ChatMessage } from "@/lib/types";
 import { UseChatHelpers } from "@ai-sdk/react";
 import { tool } from "ai";
 import z from "zod";
+import { checkTokenBalance } from "@/lib/utils/checkTokenBalance";
 
 export type ColendSupplyErc20Approval = {
   method: "approve";
@@ -64,25 +65,19 @@ export const colendSupplyErc20 = tool({
       walletAddress,
     });
 
-    // --- Step 1: Fetch portfolio tokens ---
-    const res = await fetch(
-      `${
-        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
-      }/api/portfolio/tokens?address=${walletAddress}`
-    );
-    if (!res.ok) {
-      throw new Error("Failed to fetch portfolio");
-    }
-    const { tokens } = (await res.json()) as { tokens: any[] };
-
-    // --- Step 2: Find matching token in portfolio ---
-    const tokenData = tokens.find(
-      (t) => t.token_address.toLowerCase() === tokenAddress.toLowerCase()
+    // --- Step 1: Check token balance using helper ---
+    const result = await checkTokenBalance(
+      walletAddress,
+      tokenAddress,
+      tokenName,
+      value
     );
 
-    if (!tokenData) {
-      console.log("No balance found for token ", tokenName, tokenAddress);
+    // --- Step 2: Handle insufficient balance or missing token ---
+    if (!result.ok) {
+      console.log(result.error);
       return {
+        stage: "erc20-approval-and-supply",
         approval: {
           method: "approve",
           tokenAddress,
@@ -97,48 +92,18 @@ export const colendSupplyErc20 = tool({
           amount: value,
           referralCode: 0,
         },
-        stage: "erc20-approval-and-supply",
-        error: `No balance found for token ${tokenName} (${tokenAddress})`,
+        error: result.error,
       };
     }
 
-    // --- Step 3: Convert balance to human-readable ---
-    const decimals = tokenData.decimals || 18;
-    const rawBalance = BigInt(tokenData.balance);
-    const balanceHuman = Number(rawBalance) / 10 ** decimals;
-
-    const requested = Number(value);
-
-    if (balanceHuman < requested) {
-      console.log("Insufficient balance for token ", tokenName, tokenAddress);
-      return {
-        stage: "erc20-approval-and-supply",
-        approval: {
-          method: "approve",
-          tokenAddress,
-          spender: COLEND_POOL_ADDRESS,
-          amount: value,
-        },
-        error: `Insufficient balance: user has ${balanceHuman} ${tokenName}, but tried to supply ${requested}.`,
-        supply: {
-          method: "supply",
-          poolAddress: COLEND_POOL_ADDRESS,
-          tokenAddress,
-          tokenName,
-          amount: value,
-          referralCode: 0,
-        },
-      };
-    }
-
-    // --- Step 4: Return tx payload ---
+    // --- Step 3: Return tx payload ---
     return {
       stage: "erc20-approval-and-supply",
       approval: {
         method: "approve",
         tokenAddress,
         spender: COLEND_POOL_ADDRESS,
-        amount: value, // UI can choose to use MAX_UINT256 instead
+        amount: value, // UI can choose MAX_UINT256 instead
       },
       supply: {
         method: "supply",

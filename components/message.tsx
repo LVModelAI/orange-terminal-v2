@@ -649,6 +649,7 @@ const PurePreviewMessage = ({
                 if (state === "output-available") {
                   const { output } = part;
                   const tx = output as ColendSupplyCoreTxProps;
+                  if (tx.error) return null;
                   return (
                     <ColendSupplyCore
                       tx={tx}

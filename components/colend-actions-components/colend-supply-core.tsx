@@ -89,6 +89,30 @@ const ColendSupplyCore: React.FC<ColendSupplyCoreProps> = ({
   };
 
   const isButtonDisabled = isSending || isMining || isSuccess;
+
+  useEffect(() => {
+    if (sendError) {
+      const errorMessage = (sendError as any)?.message || "Transaction error";
+
+      if (errorMessage.includes("User rejected the request")) {
+        console.error("User rejected the request");
+
+        sendMessage({
+          role: "system",
+          parts: [
+            {
+              type: "text",
+              text: "User cancelled the transaction.",
+            },
+          ],
+        });
+      } else {
+        console.error("[writeContract] error:", sendError);
+        console.error(errorMessage);
+      }
+    }
+  }, [sendError, sendMessage]);
+
   useEffect(() => {
     if (isSuccess && receipt?.status === "success") {
       sendMessage({
