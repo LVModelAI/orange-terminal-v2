@@ -88,7 +88,7 @@ type ColendPoolSummary = {
   project: string;
   tvlUsd: number;
   apy: number;
-  apyReward: number;
+  // apyReward: number;
   ilRisk: string;
 };
 
@@ -227,7 +227,7 @@ const summarizeColend = (raw: ColendPoolRaw[]): ColendPoolSummary[] =>
     project: p.project,
     tvlUsd: p.tvlUsd,
     apy: p.apy,
-    apyReward: p.apyReward,
+    // apyReward: p.apyReward,
     ilRisk: p.ilRisk,
   }));
 

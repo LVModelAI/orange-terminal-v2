@@ -25,6 +25,7 @@ export type ColendSupplyErc20TxProps = {
   stage: "erc20-approval-and-supply";
   approval: ColendSupplyErc20Approval;
   supply: ColendSupplyErc20Supply;
+  error?: string;
 };
 
 export type ColendSupplyErc20Props = {
@@ -46,38 +47,105 @@ export const colendSupplyErc20 = tool({
     tokenName: z
       .string()
       .describe("Display name for the token (e.g., 'stCORE')"),
+    walletAddress: z
+      .string()
+      .describe("User's wallet address to fetch balance from"),
   }),
   execute: async ({
     value,
     tokenAddress,
     tokenName,
+    walletAddress,
   }): Promise<ColendSupplyErc20TxProps> => {
     console.log("Executing colendSupplyErc20 with params:", {
       value,
       tokenAddress,
       tokenName,
+      walletAddress,
     });
 
-    // Component will:
-    // 1) fetch decimals via ERC20.decimals()
-    // 2) convert `value` -> base units
-    // 3) call approve(tokenAddress, spender=pool, amount=MAX_UINT256)
-    // 4) call pool.supply(tokenAddress, amountInUnits, onBehalfOf=sender, referralCode=0)
+    // --- Step 1: Fetch portfolio tokens ---
+    const res = await fetch(
+      `${
+        process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"
+      }/api/portfolio/tokens?address=${walletAddress}`
+    );
+    if (!res.ok) {
+      throw new Error("Failed to fetch portfolio");
+    }
+    const { tokens } = (await res.json()) as { tokens: any[] };
 
+    // --- Step 2: Find matching token in portfolio ---
+    const tokenData = tokens.find(
+      (t) => t.token_address.toLowerCase() === tokenAddress.toLowerCase()
+    );
+
+    if (!tokenData) {
+      console.log("No balance found for token ", tokenName, tokenAddress);
+      return {
+        approval: {
+          method: "approve",
+          tokenAddress,
+          spender: COLEND_POOL_ADDRESS,
+          amount: value,
+        },
+        supply: {
+          method: "supply",
+          poolAddress: COLEND_POOL_ADDRESS,
+          tokenAddress,
+          tokenName,
+          amount: value,
+          referralCode: 0,
+        },
+        stage: "erc20-approval-and-supply",
+        error: `No balance found for token ${tokenName} (${tokenAddress})`,
+      };
+    }
+
+    // --- Step 3: Convert balance to human-readable ---
+    const decimals = tokenData.decimals || 18;
+    const rawBalance = BigInt(tokenData.balance);
+    const balanceHuman = Number(rawBalance) / 10 ** decimals;
+
+    const requested = Number(value);
+
+    if (balanceHuman < requested) {
+      console.log("Insufficient balance for token ", tokenName, tokenAddress);
+      return {
+        stage: "erc20-approval-and-supply",
+        approval: {
+          method: "approve",
+          tokenAddress,
+          spender: COLEND_POOL_ADDRESS,
+          amount: value,
+        },
+        error: `Insufficient balance: user has ${balanceHuman} ${tokenName}, but tried to supply ${requested}.`,
+        supply: {
+          method: "supply",
+          poolAddress: COLEND_POOL_ADDRESS,
+          tokenAddress,
+          tokenName,
+          amount: value,
+          referralCode: 0,
+        },
+      };
+    }
+
+    // --- Step 4: Return tx payload ---
     return {
       stage: "erc20-approval-and-supply",
       approval: {
         method: "approve",
         tokenAddress,
         spender: COLEND_POOL_ADDRESS,
-        amount: value,
+        amount: value, // UI can choose to use MAX_UINT256 instead
       },
       supply: {
         method: "supply",
         poolAddress: COLEND_POOL_ADDRESS,
         tokenAddress,
         tokenName,
-        amount: value, // human-readable; convert using decimals before sending
+        amount: value,
         referralCode: 0,
       },
     };

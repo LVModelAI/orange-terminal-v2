@@ -351,7 +351,7 @@ const PurePreviewMessage = ({
 
                 if (state === "output-available") {
                   const { output } = part;
-                  console.log("get portfolio output --- ", output);
+                  // console.log("get portfolio output --- ", output);
                   return (
                     <div key={toolCallId}>
                       <ToolCallLoader
@@ -611,7 +611,7 @@ const PurePreviewMessage = ({
                   );
                 }
               }
-              // ens to address
+
               if (type === "tool-ensToAddress") {
                 const { toolCallId, state } = part;
 
@@ -671,7 +671,10 @@ const PurePreviewMessage = ({
 
                 if (state === "output-available") {
                   const { output } = part;
+
                   const tx = output as ColendSupplyErc20TxProps;
+                  if (tx.error) return null;
+
                   return (
                     <ColendSupplyErc20
                       tx={tx}
