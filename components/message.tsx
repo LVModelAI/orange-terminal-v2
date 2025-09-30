@@ -776,6 +776,7 @@ const PurePreviewMessage = ({
                 if (state === "output-available") {
                   const { output } = part;
                   const tx = output as PellStakeErc20TxProps;
+                  if (tx.error) return null;
                   return (
                     <PellStakeErc20
                       tx={tx}
@@ -846,7 +847,7 @@ const PurePreviewMessage = ({
                   return (
                     <div key={toolCallId}>
                       <ToolCallLoader
-                        loadingMessage="Pell strategies fetched..."
+                        loadingMessage="Pell strategies fetched"
                         isFinished
                       />
                     </div>
