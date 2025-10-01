@@ -870,6 +870,7 @@ The UI will automatically calculate minPoolAmountOut using pool.net_value_per_sh
 Input schema:
 - poolAddress → The DeSyn pool address obtained from getDefiProtocolsStats.
 - amount → Human-readable token amount to issue. Example: "100".
+- walletAddress → User's wallet address.
 
 # Edge cases and safety
 

@@ -4,6 +4,7 @@ import z from "zod";
 import { UseChatHelpers } from "@ai-sdk/react";
 import type { ChatMessage } from "@/lib/types";
 import { Address, parseUnits } from "viem";
+import { checkTokenBalance } from "@/lib/utils/checkTokenBalance";
 
 export type DesynIssueTokenTxProps = {
   poolAddress: `0x${string}`;
@@ -24,6 +25,7 @@ export type DesynIssueTokenTxProps = {
 
   // computed outside (latest net value per share, with slippage applied)
   minOutStr: string;
+  error?: string;
 };
 
 export type DesynIssueTokenProps = {
@@ -41,11 +43,17 @@ export const desynIssueToken = tool({
     amount: z
       .string()
       .describe("Human-readable amount of handle token to issue (e.g., '100')"),
+    walletAddress: z.string().describe("User's wallet address"),
   }),
-  execute: async ({ poolAddress, amount }): Promise<DesynIssueTokenTxProps> => {
+  execute: async ({
+    poolAddress,
+    amount,
+    walletAddress,
+  }): Promise<DesynIssueTokenTxProps> => {
     console.log("Executing desynIssueToken with params:", {
       poolAddress,
       amount,
+      walletAddress,
     });
 
     // ---------- 1. Fetch pool net value ----------
@@ -100,6 +108,32 @@ export const desynIssueToken = tool({
     console.log("rewards", rewards);
     console.log("minOut", minOut);
     console.log("--------------------------------");
+
+    // check if user has enough balance
+    const result = await checkTokenBalance(
+      walletAddress,
+      tokenAddress.toString(),
+      amount.toString()
+    );
+
+    // handle insufficient balance
+    if (!result.ok) {
+      return {
+        poolAddress: poolAddress as `0x${string}`,
+        amount,
+        tokenAddress,
+        tokenDecimals,
+        tokenSymbol,
+        tokenName,
+        controllerAddr,
+        kolAddr,
+        poolName,
+        poolShareSymbol,
+        rewards,
+        minOutStr: minOut.toString(),
+        error: result.error,
+      };
+    }
 
     return {
       poolAddress: poolAddress as `0x${string}`,
