@@ -2,6 +2,7 @@ import { tool } from "ai";
 import { z } from "zod";
 import { toUnits } from "@/lib/utils/to-units";
 import { PellToken } from "@/app/api/portfolio/pell-restaking-portfolio/route";
+import { isAddress } from "viem";
 
 // const nfts = [
 //   {
@@ -272,6 +273,14 @@ export const getPortfolio = tool({
   }),
   execute: async ({ walletAddress }) => {
     console.log("getting portolfio for wallet ", walletAddress);
+    // if wallet addres is not an address, return error
+    if (!isAddress(walletAddress)) {
+      console.log("Invalid wallet address");
+      return {
+        error:
+          "Invalid wallet address. fetch wallet address from getUserWalletInfo tool and try again.",
+      };
+    }
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
 
     const endpoints = {

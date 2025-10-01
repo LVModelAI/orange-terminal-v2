@@ -862,7 +862,7 @@ const PurePreviewMessage = ({
                 if (state === "input-available") {
                   return (
                     <div key={toolCallId}>
-                      <ToolCallLoader loadingMessage="Preparing DeSyn issue UI..." />
+                      <ToolCallLoader loadingMessage="Preparing DeSyn transaction..." />
                     </div>
                   );
                 }

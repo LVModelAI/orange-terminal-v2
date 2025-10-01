@@ -2,86 +2,38 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { FaSpinner, FaCheck, FaTimes } from "react-icons/fa";
-import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import {
+  useWaitForTransactionReceipt,
+  useWriteContract,
+  useReadContract,
+} from "wagmi";
 import { Address, erc20Abi, parseUnits } from "viem";
 import { useAppKitAccount } from "@reown/appkit/react";
 import Link from "next/link";
 import { CheckCircleFillIcon } from "@/components/icons";
 import { CHAIN_ID, CORESCAN_BASE_URL } from "@/lib/constants";
+import { DesynIssueTokenTxProps } from "@/lib/ai/tools/desyn/desynIssueToken";
 
-// ---- API response types ----
-type PoolNetValueTsTokenEntry = {
-  token: {
-    address: `0x${string}`;
-    decimals: number;
-    name: string;
-    symbol: string;
-  };
-  token_allocation_ratio: number;
-  token_balance: number;
-  token_net_value: number;
-  token_price: number;
-  token_price_change_ratio_by_period: number;
-};
-
-type PoolNetValueLatest = {
-  pool: `0x${string}`;
-  period: string;
-  ts_in_seconds: number;
-  net_value: number;
-  net_value_per_share: number;
-  total_shares: number;
-  net_value_change_ratio_by_period: number;
-  tvl_rate: number;
-  tokens: PoolNetValueTsTokenEntry[];
-};
-
-type PoolNetValueTsResponse = {
-  data: {
-    latest: PoolNetValueLatest;
-  };
-};
-
-type DesynPoolGetResponse = {
-  err: { code: number; msg: string; msgDebug: string };
-  data: {
-    pool: {
-      id: `0x${string}`;
-      name: string;
-      symbol: string;
-      controller: `0x${string}`;
-      crpController: `0x${string}`;
-      tokensList: `0x${string}`[];
-      reward_en: string;
-    };
-  };
-};
-
-type SwapInfoBase = {
-  aggregator: Address;
-  rebalanceAdapter: Address;
-  swapType: number; // uint8
-};
-
-type SwapData = {
-  quantity: bigint;
-  data: `0x${string}`;
-};
-
-export type DesynIssueTokenTxProps = {
-  poolAddress: `0x${string}`; // pool
-  amount: string; // human-readable issueAmount in handle token
-};
-
-export type DesynIssueTokenProps = {
+// ---- Props ----
+type DesynIssueTokenProps = {
   tx: DesynIssueTokenTxProps;
+
   sendMessage: (msg: {
     role: "system" | "user" | "assistant";
     parts: { type: "text"; text: string }[];
   }) => void;
 };
 
-// Router contract that exposes autoJoinSmartPool
+type Phase =
+  | "idle"
+  | "awaiting_wallet"
+  | "approving"
+  | "approved"
+  | "issuing"
+  | "success"
+  | "error";
+
+// Router contract
 const DESYN_ROUTER_ADDRESS =
   "0x099d9d991ef4db37e4ad3308452c250097cadb7f" as Address;
 
@@ -118,17 +70,7 @@ const routerAbi = [
   },
 ] as const;
 
-type Phase =
-  | "idle"
-  | "awaiting_wallet"
-  | "approving"
-  | "approved"
-  | "issuing"
-  | "success"
-  | "error";
-
 const DEFAULT_KOL = "0x0000000000000000000000000000000000000000" as Address;
-
 const DEFAULT_AGGREGATOR =
   "0x74f56a7560ef0c72cf6d677e3f5f51c2d579ff15" as Address;
 const DEFAULT_REBALANCE_ADAPTER =
@@ -151,127 +93,27 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
   const [lastIssueHash, setLastIssueHash] = useState<
     `0x${string}` | undefined
   >();
-  const [minOut, setMinOut] = useState<bigint | undefined>();
-  const [poolName, setPoolName] = useState<string | undefined>();
-  const [poolShareSymbol, setPoolShareSymbol] = useState<string | undefined>();
-  const [tokenAddress, setTokenAddress] = useState<Address | undefined>();
-  const [tokenDecimals, setTokenDecimals] = useState<number | undefined>();
-  const [tokenSymbol, setTokenSymbol] = useState<string | undefined>();
-  const [tokenName, setTokenName] = useState<string | undefined>();
-  const [kolAddr, setKolAddr] = useState<Address | undefined>();
-  const [controllerAddr, setControllerAddr] = useState<Address | undefined>();
-  const [handleToken, setHandleToken] = useState<Address | undefined>();
-  const [outWeiHuman, setOutWeiHuman] = useState<number | undefined>();
-  const [rewards, setRewards] = useState<string | undefined>();
-  const [outTokenName, setOutTokenName] = useState<string | undefined>();
-  const [outTokenSymbol, setOutTokenSymbol] = useState<string | undefined>();
 
   const sentApproveRef = useRef(false);
   const sentIssueRef = useRef(false);
 
-  // Fetch DeSyn pool info to compute minPoolAmountOut
-  useEffect(() => {
-    if (!tx.poolAddress || !tx.amount) return;
-
-    let aborted = false;
-    const fetchPool = async () => {
-      console.log("[Desyn] pool_net_value_ts_seq fetch pool info...");
-      try {
-        const res = await fetch(
-          `https://api.desyn.io/core/etf/pool_net_value_ts_seq/${tx.poolAddress}?period=DAY`
-        );
-        const json = (await res.json()) as PoolNetValueTsResponse;
-        const latest_data = json?.data?.latest;
-        if (!latest_data) return;
-
-        const firstToken = latest_data.tokens?.[0]?.token;
-        if (firstToken?.address) setTokenAddress(firstToken.address as Address);
-        if (typeof firstToken?.decimals === "number")
-          setTokenDecimals(firstToken.decimals);
-        if (firstToken?.symbol) setTokenSymbol(firstToken.symbol);
-        if (firstToken?.name) setTokenName(firstToken.name);
-
-        const amtNumber = Number(tx.amount);
-        if (!(amtNumber > 0)) return;
-        let outHuman = amtNumber / Number(latest_data.net_value_per_share);
-        // fix outhuman to 6 decimal places
-        const outWei = parseUnits(String(outHuman), 18);
-        const outWeiWithSlippage = (outWei * 995n) / 1000n;
-        outHuman = Number(outHuman.toFixed(6));
-
-        if (!aborted) {
-          setOutWeiHuman(outHuman);
-          setMinOut(outWeiWithSlippage);
-        }
-      } catch (e) {
-        console.error("Failed to fetch DeSyn pool data", e);
-      }
-    };
-
-    // run once immediately
-    fetchPool();
-    // set interval
-    const id = setInterval(fetchPool, 30000);
-
-    return () => {
-      aborted = true;
-      clearInterval(id);
-    };
-  }, [tx.poolAddress, tx.amount]);
-
-  // fetch controller and handle token address
-  useEffect(() => {
-    if (!tx.poolAddress) return;
-    const fetchPool = async () => {
-      console.log("[Desyn] pool/get?pool_id fetch pool info...");
-      const res = await fetch(
-        `https://api.desyn.io/core/api/v1/chaindata/pool/get?pool_id=${tx.poolAddress}`
-      );
-      const json = (await res.json()) as DesynPoolGetResponse;
-
-      const ctrl = json?.data?.pool?.controller as `0x${string}` | undefined;
-      const token0 = json?.data?.pool?.tokensList?.[0] as
-        | `0x${string}`
-        | undefined;
-      const outTokenName = json?.data?.pool?.name;
-      const outTokenSymbol = json?.data?.pool?.symbol;
-      const reward_en = json?.data?.pool?.reward_en;
-      if (ctrl) {
-        setKolAddr(ctrl as Address);
-        setControllerAddr(ctrl as Address);
-      }
-      if (token0) {
-        setHandleToken(token0 as Address);
-      }
-      if (outTokenName) {
-        setOutTokenName(outTokenName);
-        setPoolName(outTokenName);
-      }
-      if (outTokenSymbol) {
-        setOutTokenSymbol(outTokenSymbol);
-        setPoolShareSymbol(outTokenSymbol);
-      }
-      if (reward_en) {
-        setRewards(reward_en);
-      }
-    };
-    void fetchPool();
-
-    const id = setInterval(fetchPool, 30000);
-
-    return () => {
-      clearInterval(id);
-    };
-  }, [tx.poolAddress]);
-
   const parsedIssueAmount = useMemo(() => {
     try {
-      if (!tx.amount || typeof tokenDecimals !== "number") return undefined;
-      return parseUnits(tx.amount, tokenDecimals);
+      return parseUnits(tx.amount, tx.tokenDecimals);
     } catch {
       return undefined;
     }
-  }, [tx.amount, tokenDecimals]);
+  }, [tx.amount, tx.tokenDecimals]);
+
+  // allowance check
+  const { data: allowance } = useReadContract({
+    address: tx.tokenAddress,
+    abi: erc20Abi,
+    functionName: "allowance",
+    args: [from as Address, DESYN_ROUTER_ADDRESS],
+    chainId: CHAIN_ID,
+    query: { enabled: !!from },
+  });
 
   const {
     writeContract,
@@ -294,7 +136,7 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
     query: { enabled: !!issueHash },
   });
 
-  // Route hashes into correct buckets based on phase
+  // route hashes
   useEffect(() => {
     if (!writeHash) return;
     if (phase === "awaiting_wallet" || phase === "approving")
@@ -302,25 +144,15 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
     if (phase === "issuing") setIssueHash(writeHash);
   }, [writeHash, phase]);
 
-  // Handle write errors
+  // errors
   useEffect(() => {
     if (!sendError) return;
     const msg = (sendError as any)?.message || "Transaction error";
-    if (msg.includes("User rejected")) {
-      setErrorMsg("User rejected the request");
-      setPhase("error");
-      sendMessage({
-        role: "system",
-        parts: [{ type: "text", text: "User cancelled the transaction." }],
-      });
-    } else {
-      console.error("[Desyn] tx error:", sendError);
-      setErrorMsg(msg);
-      setPhase("error");
-    }
-  }, [sendError, sendMessage]);
+    setErrorMsg(msg);
+    setPhase("error");
+  }, [sendError]);
 
-  // When approve confirms, advance
+  // approve confirmed
   useEffect(() => {
     if (!approveHash) return;
     if (approveWait.isError) {
@@ -337,63 +169,41 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
     }
   }, [approveHash, approveWait.isError, approveWait.isSuccess]);
 
-  // After approved, call autoJoinSmartPool
+  // issue after approved
   useEffect(() => {
     const doIssue = async () => {
       if (phase !== "approved") return;
-      if (
-        !parsedIssueAmount ||
-        !from ||
-        !minOut ||
-        !handleToken ||
-        !kolAddr ||
-        !controllerAddr
-      ) {
-        setErrorMsg("Missing parsed amount, sender, or minOut");
+      if (!parsedIssueAmount || !from) {
+        setErrorMsg("Missing parsed amount or sender");
         setPhase("error");
         return;
       }
+      const minOut = BigInt(tx.minOutStr);
+
       try {
         setPhase("issuing");
-        const swapBase: SwapInfoBase = {
-          aggregator: DEFAULT_AGGREGATOR as Address,
-          rebalanceAdapter: DEFAULT_REBALANCE_ADAPTER as Address,
-          swapType: DEFAULT_SWAP_TYPE,
-        };
-        const swapDatas: SwapData[] = [
-          {
-            quantity: parsedIssueAmount,
-            data: "0x",
-          },
-        ];
-        console.log("[Desyn issue args]", {
-          controllerAddr,
-          kolAddr,
-          parsedIssueAmount,
-          minOut,
-          handleToken,
-          swapBase,
-          swapDatas,
-        });
         await writeContract({
           address: DESYN_ROUTER_ADDRESS,
           abi: routerAbi,
           functionName: "autoJoinSmartPool",
           args: [
-            controllerAddr,
-            kolAddr,
+            tx.controllerAddr,
+            tx.kolAddr ?? DEFAULT_KOL,
             parsedIssueAmount,
             minOut,
-            handleToken as Address,
-            swapBase,
-            swapDatas,
+            tx.tokenAddress,
+            {
+              aggregator: DEFAULT_AGGREGATOR,
+              rebalanceAdapter: DEFAULT_REBALANCE_ADAPTER,
+              swapType: DEFAULT_SWAP_TYPE,
+            },
+            [{ quantity: parsedIssueAmount, data: "0x" }],
           ],
           chainId: CHAIN_ID,
           account: from as Address,
-          value: 0n, // payable, but using ERC20 so no native value
+          value: 0n,
         });
       } catch (e: any) {
-        console.error("[Desyn autoJoinSmartPool] error:", e);
         setErrorMsg(e?.message || "Issue failed");
         setPhase("error");
       }
@@ -402,7 +212,7 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  // On issue confirmed
+  // confirm issue
   useEffect(() => {
     if (!issueHash) return;
     if (issueWait.isError) {
@@ -420,24 +230,13 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
           parts: [
             {
               type: "text",
-              text: `Issued ${tx.amount} ${tokenSymbol ?? "TOKEN"} into pool ${
-                poolName ?? poolShareSymbol ?? "POOL"
-              }`,
+              text: `Issued ${tx.amount} ${tx.tokenSymbol} into pool ${tx.poolName}`,
             },
           ],
         });
       }
     }
-  }, [
-    issueHash,
-    issueWait.isError,
-    issueWait.isSuccess,
-    tx.amount,
-    tokenSymbol,
-    poolName,
-    poolShareSymbol,
-    sendMessage,
-  ]);
+  }, [issueHash, issueWait.isError, issueWait.isSuccess, tx, sendMessage]);
 
   const handleIssueFlow = async () => {
     setErrorMsg("");
@@ -445,25 +244,20 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
     sentIssueRef.current = false;
 
     if (!isConnected || !from) return setErrorMsg("Connect your wallet first");
-    if (typeof tokenDecimals !== "number")
-      return setErrorMsg("Could not fetch token decimals");
-    if (!parsedIssueAmount)
-      return setErrorMsg("Invalid amount for token decimals");
-    if (!handleToken)
-      return setErrorMsg("Handle token address not resolved yet");
-    // Approval skipped for now
+    if (!parsedIssueAmount) return setErrorMsg("Invalid amount");
 
     try {
+      // 👇 check allowance first
+      if (allowance !== undefined && allowance >= parsedIssueAmount) {
+        console.log("[Desyn] already approved, skipping approve");
+        setPhase("approved"); // jump straight to issuing step
+        return;
+      }
+
+      // otherwise go through approve flow
       setPhase("awaiting_wallet");
-      console.log("[Desyn approve]", {
-        token: handleToken,
-        spender: DESYN_ROUTER_ADDRESS,
-        amountWei: parsedIssueAmount.toString(),
-        chainId: CHAIN_ID,
-        account: from,
-      });
       await writeContract({
-        address: handleToken,
+        address: tx.tokenAddress,
         abi: erc20Abi,
         functionName: "approve",
         args: [DESYN_ROUTER_ADDRESS, parsedIssueAmount],
@@ -472,7 +266,6 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
       });
       setPhase("approving");
     } catch (e: any) {
-      console.error("[approve] error:", e);
       setErrorMsg(e?.message || "Approve failed");
       setPhase("error");
     }
@@ -480,43 +273,34 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
 
   const isAwaitingApproval =
     phase === "awaiting_wallet" || phase === "approving";
-
   const isButtonDisabled =
     isSending || phase === "issuing" || phase === "success";
 
   function ButtonContent() {
-    if (isAwaitingApproval) {
+    if (isAwaitingApproval)
       return (
         <>
-          <FaSpinner className="animate-spin" />
-          Approving...
+          <FaSpinner className="animate-spin" /> Approving...
         </>
       );
-    }
-    if (phase === "issuing") {
+    if (phase === "issuing")
       return (
         <>
-          <FaSpinner className="animate-spin" />
-          Issuing...
+          <FaSpinner className="animate-spin" /> Issuing...
         </>
       );
-    }
-    if (phase === "success") {
+    if (phase === "success")
       return (
         <>
-          <FaCheck />
-          Issued
+          <FaCheck /> Issued
         </>
       );
-    }
-    if (phase === "error") {
+    if (phase === "error")
       return (
         <>
-          <FaTimes />
-          Retry
+          <FaTimes /> Retry
         </>
       );
-    }
     return <>Issue</>;
   }
 
@@ -527,22 +311,15 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
 
         <div className="text-sm grid grid-cols-2 gap-y-2 mb-4">
           <span className="text-gray-400">Strategy</span>
-          <span className="text-right break-all">{poolName ?? "..."}</span>
+          <span className="text-right break-all">{tx.poolName}</span>
           <span className="text-gray-400">Pay Token</span>
-          <span className="text-right break-all">{tokenName ?? "..."}</span>
+          <span className="text-right break-all">{tx.tokenName}</span>
           <span className="text-gray-400">Amount</span>
           <span className="text-right">
-            {tx.amount} {tokenSymbol ?? ""}
+            {tx.amount} {tx.tokenSymbol}
           </span>
-          {/* <span className="text-gray-400">Estimated Shares Out</span>
-          <span className="text-right">
-            {outWeiHuman !== undefined
-              ? `${outWeiHuman} ${poolShareSymbol ?? ""}`
-              : "..."}
-          </span> */}
-          {/* rewards */}
           <span className="text-gray-400">Rewards</span>
-          <span className="text-right">{rewards}</span>
+          <span className="text-right">{tx.rewards ?? "-"}</span>
         </div>
 
         {errorMsg && (
@@ -592,11 +369,9 @@ const IssueTokenDesyn: React.FC<DesynIssueTokenProps> = ({
             <CheckCircleFillIcon size={40} />
           </div>
           <h3 className="text-xl font-semibold mb-2">
-            Successfully issued {tx.amount} {tokenSymbol ?? ""}
+            Successfully issued {tx.amount} {tx.tokenSymbol}
           </h3>
-          <p className="text-gray-500 text-sm">
-            Into pool {poolName ?? poolShareSymbol ?? tx.poolAddress}
-          </p>
+          <p className="text-gray-500 text-sm">Into pool {tx.poolName}</p>
           {lastIssueHash && (
             <p className="mt-2">
               <Link
